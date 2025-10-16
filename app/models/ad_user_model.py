@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class User(BaseModel):
+class ADUser(BaseModel):
     Name: str
     SamAccountName: str
     Enabled: bool
