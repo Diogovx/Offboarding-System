@@ -1,9 +1,13 @@
-from fastapi import FastAPI
+from typing import Annotated
+from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordBearer
 from subprocess import run, PIPE, STDOUT
 import json
 from .models import ADUser
 
 app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @app.get("/")
 async def root():
@@ -12,11 +16,19 @@ async def root():
 @app.get("/user", response_model=list[ADUser])
 async def get_user(username: str | None = None):
     if not username:
-        command = "powershell.exe -Command \"Get-AdUser -Filter '*' -Properties SamAccountName,Name,Enabled | ConvertTo-Json -Compress\""
+        filter_str = "*"
     else:
-        command = f"powershell.exe -Command \"Get-AdUser -Filter 'Name -like ''*{username}*''' -Properties SamAccountName,Name,Enabled | ConvertTo-Json -Compress\""
+        safe_username = username.replace('"', '\"')
+        filter_str = f"Name -like '*{safe_username}*'"
     
-    command_output = run(command, shell=True, stdout=PIPE, stderr=STDOUT)
+    command_args = [
+        "powershell.exe",
+        "-NonInteractive",
+        "-Command",
+        f"Get-AdUser -Filter \"{filter_str}\" -Properties SamAccountName,Name,Enabled | ConvertTo-Json -Compress"
+    ]
+    
+    command_output = run(command_args, stdout=PIPE, stderr=STDOUT)
     
     output_string = command_output.stdout.decode('utf-8', errors='ignore').strip()
     
@@ -32,4 +44,7 @@ async def get_user(username: str | None = None):
         
         return [ADUser.model_validate(user) for user in users_list]
     except json.JSONDecodeError:
-        return {"error": "The command output is not valid JSON.", "output": output_string}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao consultar Active Directory."
+        )
