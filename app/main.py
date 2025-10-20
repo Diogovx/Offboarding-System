@@ -5,13 +5,19 @@ from subprocess import run, PIPE, STDOUT
 import json
 from .models import ADUser
 
+
+
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @app.get("/")
 async def root():
-    return { "message": "Hello World"}
+    return { 
+        "status": "online", 
+        "version": "v1.0.0",
+        "docs": "/docs" 
+    }
     
 @app.get("/user", response_model=list[ADUser])
 async def get_user(username: str | None = None):
