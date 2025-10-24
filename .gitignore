@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+# SQLite database files
+*.db
+*.sqlite
+*.sqlite3

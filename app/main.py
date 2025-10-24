@@ -1,13 +1,19 @@
+from contextlib import asynccontextmanager
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from subprocess import run, PIPE, STDOUT
 import json
 from .models import ADUser
+from .database import init_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
 
 
-
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -19,7 +25,7 @@ async def root():
         "docs": "/docs" 
     }
     
-@app.get("/user", response_model=list[ADUser])
+@app.get("/aduser", response_model=list[ADUser])
 async def get_user(username: str | None = None):
     if not username:
         filter_str = "*"

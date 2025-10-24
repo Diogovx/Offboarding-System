@@ -1,7 +1,8 @@
 from .ad_user_model import ADUser
-from .user_model import User
+from .user_model import User, table_registry
 
 __all__ = [
     "ADUser",
-    "User"
+    "User",
+    "table_registry"
 ]
