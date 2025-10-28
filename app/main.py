@@ -2,10 +2,12 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 from subprocess import run, PIPE, STDOUT
 import json
-from .models import ADUser
-from .database import init_db
+from .models import ADUser, User
+from .database import init_db, get_db
+from .security import get_password_hash
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,3 +62,22 @@ async def get_user(username: str | None = None):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao consultar Active Directory."
         )
+        
+
+@app.post("/test-user")
+def create_user(db: Session = Depends(get_db)):
+    
+    existing_user = db.query(User).filter(User.username == "test-user").first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Usuário 'test-user' já existe."
+        )
+    
+    hashed_pwd = get_password_hash('123')
+    
+    user = User(username="test-user", email="admin@test.com", password=hashed_pwd, enabled=True)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
