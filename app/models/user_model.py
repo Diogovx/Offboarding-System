@@ -1,7 +1,7 @@
 import uuid
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from sqlalchemy import func, String, Boolean, Integer, DateTime, BLOB
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, registry, mapped_column
 from sqlalchemy.types import TypeDecorator
 from ..enums import UserRole
@@ -50,3 +50,15 @@ class User:
     created_at: Mapped[datetime] = mapped_column(
         DateTime, init=False, server_default=func.now()
     )
+
+class UserPublic(BaseModel):
+    username: str
+    email: EmailStr
+    
+class UserSchema(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+class UserList(BaseModel):
+    users: list[UserPublic]
