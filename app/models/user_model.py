@@ -51,14 +51,4 @@ class User:
         DateTime, init=False, server_default=func.now()
     )
 
-class UserPublic(BaseModel):
-    username: str
-    email: EmailStr
-    
-class UserSchema(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
 
-class UserList(BaseModel):
-    users: list[UserPublic]

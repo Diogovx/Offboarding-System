@@ -6,9 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from subprocess import run, PIPE, STDOUT
 import json
-from .models import ADUser, User, UserPublic, UserList
+from .models import ADUser, User
 from .database import init_db, get_db
 from .security import get_password_hash
+from .schemas import UserPublic, UserCreate, UserList
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -81,14 +82,14 @@ def create_test_user(session: Session = Depends(get_db)):
     
     hashed_pwd = get_password_hash('123')
     
-    user = User(username="test-user", email="admin@test.com", password=hashed_pwd, enabled=True)
+    user = UserCreate(username="test-user", email="admin@test.com", password=hashed_pwd, enabled=True)
     session.add(user)
     session.commit()
     session.refresh(user)
     return user
 
 @app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: User, session: Session = Depends(get_db)):
+def create_user(user: UserCreate, session: Session = Depends(get_db)):
     
     db_user = session.query(User).filter(User.username == user.username).first()
     if db_user:
@@ -112,7 +113,7 @@ def create_user(user: User, session: Session = Depends(get_db)):
     return db_user
     
 
-@app.put('/users/{user_id}', response_model=User)
+@app.put('/users/{user_id}', response_model=UserPublic)
 def update_user(
     user: User,
     session: Session = Depends(get_db)
