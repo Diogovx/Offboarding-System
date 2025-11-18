@@ -7,7 +7,7 @@ from jwt import decode, ExpiredSignatureError, InvalidTokenError
 from app.models import User
 from app.schemas import UserPublic
 from app.database import get_db
-from app.security import get_password_hash, SECRET_KEY, ALGORITHM
+from app.security import get_password_hash, SECRET_KEY, ALGORITHM, get_current_user, require_admin
 from app.schemas import UserCreate, UserList
 
 router = APIRouter(
@@ -17,7 +17,7 @@ router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.get("/", response_model=UserList)
-def list_users(session: Session = Depends(get_db)):
+def list_users(session: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     users = session.query(User).all()
     return {"users": users}
 
@@ -38,7 +38,7 @@ def create_test_user(session: Session = Depends(get_db)):
     return user
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserCreate, session: Session = Depends(get_db)):
+def create_user(user: UserCreate, session: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     
     db_user = session.query(User).filter(User.username == user.username).first()
     if db_user:
@@ -55,7 +55,7 @@ def create_user(user: UserCreate, session: Session = Depends(get_db)):
     
     hashed_pwd = get_password_hash(user.password)
     
-    db_user = User(username=user.username, email=user.email, password=hashed_pwd, enabled=True)
+    db_user = User(username=user.username, email=user.email, password=hashed_pwd, enabled=True, userRole=user.userRole)
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
