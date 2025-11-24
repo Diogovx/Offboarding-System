@@ -4,25 +4,25 @@ import json
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import ADUser
-from app.models import ADUser
+
 router = APIRouter(
-    prefix="aduser",
+    prefix="/aduser",
     tags=["ADUser"]
 )
 
-@router.get("/aduser", response_model=list[ADUser])
-async def get_user(username: str | None = None, session: Session = Depends(get_db)):
-    if not username:
+@router.get("/", response_model=list[ADUser])
+async def get_user(registration: str | None = None, session: Session = Depends(get_db)):
+    if not registration:
         filter_str = "*"
     else:
-        safe_username = username.replace('"', '\"')
-        filter_str = f"Name -like '*{safe_username}*'"
+        safe_registration = registration.replace('"', '\"')
+        filter_str = f"Description -like '*{safe_registration}*'"
     
     command_args = [
         "powershell.exe",
         "-NonInteractive",
         "-Command",
-        f"Get-AdUser -Filter \"{filter_str}\" -Properties SamAccountName,Name,Enabled | ConvertTo-Json -Compress"
+        f"Get-AdUser -Filter \"{filter_str}\" -Properties SamAccountName,Name,Enabled,Description | ConvertTo-Json -Compress"
     ]
     
     command_output = run(command_args, stdout=PIPE, stderr=STDOUT)
