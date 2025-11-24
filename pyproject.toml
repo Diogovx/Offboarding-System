@@ -8,6 +8,7 @@ dependencies = [
     "alembic>=1.17.2",
     "fastapi[standard]>=0.119.0",
     "pwdlib[argon2]>=0.2.1",
+    "pydantic-settings>=2.12.0",
     "pyjwt>=2.10.1",
     "pytest>=8.4.2",
     "sqlalchemy>=2.0.44",
