@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.10.1",
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
     "ruff>=0.14.6",
     "sqlalchemy>=2.0.44",
     "taskipy>=1.14.1",
@@ -33,6 +34,7 @@ pythonpath = "."
 lint = 'ruff check'
 pre_format = 'ruff check --fix'
 format = 'ruff format'
-run = 'fastapi dev fast_zero/app.py'
+run = 'fastapi dev app/main.py'
 pre_test = 'task lint'
-test = 'pytest -s -x --cov=fast_zero -vv'
+test = 'pytest -s -x --cov=app -vv'
+post_test = 'coverage html'
