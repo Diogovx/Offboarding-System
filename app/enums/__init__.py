@@ -1,6 +1,4 @@
 from .roles import UserRole
 
 
-__all__ = [
-    "UserRole"
-]
+__all__ = ["UserRole"]

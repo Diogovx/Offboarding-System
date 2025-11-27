@@ -10,7 +10,9 @@ from app.security import SECRET_KEY, ALGORITHM
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid or expired authentication token",
@@ -33,16 +35,24 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
     user = db.query(User).filter(User.username == username).first()
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     return user
+
 
 def require_admin(user: User = Depends(get_current_user)):
-    if user.userRole != 1: 
-        raise HTTPException(status_code=403, detail="Admin privileges required")
+    if user.userRole != 1:
+        raise HTTPException(
+            status_code=403, detail="Admin privileges required"
+        )
     return user
+
 
 def require_editor(user: User = Depends(get_current_user)):
     if user.userRole > 2:
-        raise HTTPException(status_code=403, detail="Editor privileges required")
+        raise HTTPException(
+            status_code=403, detail="Editor privileges required"
+        )
     return user

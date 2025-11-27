@@ -3,7 +3,7 @@ from .security import (
     verify_password,
     SECRET_KEY,
     ALGORITHM,
-    create_access_token
+    create_access_token,
 )
 from .deps import get_current_user, require_admin, require_editor
 from .settings import Settings
@@ -17,5 +17,5 @@ __all__ = [
     "get_current_user",
     "require_admin",
     "require_editor",
-    "Settings"
+    "Settings",
 ]

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class ADUser(BaseModel):
     Name: str
     SamAccountName: str
@@ -7,6 +8,7 @@ class ADUser(BaseModel):
     DistinguishedName: str
     Description: str
 
+
 class DisableUserRequest(BaseModel):
     registration: str
-    performed_by: str        # nome de quem desativou no sistema
+    performed_by: str  # nome de quem desativou no sistema
