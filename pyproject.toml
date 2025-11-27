@@ -12,6 +12,27 @@ dependencies = [
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.10.1",
     "pytest>=8.4.2",
+    "ruff>=0.14.6",
     "sqlalchemy>=2.0.44",
     "taskipy>=1.14.1",
 ]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+preview = true
+
+[tool.ruff.format]
+preview = true
+
+[tool.pytest.ini_options]
+pythonpath = "."
+
+[tool.taskipy.tasks]
+lint = 'ruff check'
+pre_format = 'ruff check --fix'
+format = 'ruff format'
+run = 'fastapi dev fast_zero/app.py'
+pre_test = 'task lint'
+test = 'pytest -s -x --cov=fast_zero -vv'
