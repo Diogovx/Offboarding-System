@@ -13,6 +13,8 @@ def auth_header():
     token = create_access_token({"sub": "Admin"})
     return {"Authorization": f"Bearer {token}"}
 
+
+
 def test_read_users(client, auth_header):
     response = client.get('/users/', headers=auth_header)
     assert response.status_code == HTTPStatus.OK
@@ -53,3 +55,4 @@ def test_read_users(client, auth_header):
             
         ]
     }
+
