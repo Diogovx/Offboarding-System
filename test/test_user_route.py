@@ -1,18 +1,21 @@
-import pytest
 from http import HTTPStatus
+
+import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
 from app.security import create_access_token
+
 
 @pytest.fixture
 def client():
     return TestClient(app)
 
+
 @pytest.fixture
 def auth_header():
     token = create_access_token({"sub": "Admin"})
     return {"Authorization": f"Bearer {token}"}
-
 
 
 def test_read_users(client, auth_header):
@@ -52,7 +55,5 @@ def test_read_users(client, auth_header):
                 'userRole': 3,
                 'username': 'string',
             }
-            
         ]
     }
-

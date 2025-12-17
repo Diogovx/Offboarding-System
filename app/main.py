@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.database import init_db
-from app.routers import auth_router, system_router, user_router, aduser_router
+from app.routers import aduser_router, auth_router, system_router, user_router
 
 
 @asynccontextmanager

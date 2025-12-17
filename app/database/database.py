@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from ..models import table_registry
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./dismissal_assistant.db"

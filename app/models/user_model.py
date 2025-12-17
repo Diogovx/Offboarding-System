@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import func, String, Boolean, Integer, DateTime, BLOB
-from sqlalchemy.orm import Mapped, registry, mapped_column
+
+from sqlalchemy import BLOB, Boolean, DateTime, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, registry
 from sqlalchemy.types import TypeDecorator
+
 from ..enums import UserRole
 
 table_registry = registry()
@@ -12,14 +14,14 @@ class SqliteUUID(TypeDecorator):
     impl = BLOB
     cache_ok = True
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect):  # noqa: PLR6301
         if value is None:
             return None
         if isinstance(value, uuid.UUID):
             return value.bytes
         return uuid.UUID(value).bytes
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value, dialect):  # noqa: PLR6301
         if value is None:
             return None
         return uuid.UUID(bytes=value)

@@ -1,20 +1,21 @@
-from fastapi import HTTPException, Depends, APIRouter
-from fastapi.security import OAuth2PasswordBearer
 from http import HTTPStatus
+
+from fastapi import APIRouter, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-from jwt import decode, ExpiredSignatureError, InvalidTokenError
+
 from app.models import User
-from app.schemas import UserPublic
-from app.database import get_db
+from app.schemas import UserCreate, UserList, UserPublic
 from app.security import (
-    get_password_hash,
-    SECRET_KEY,
     ALGORITHM,
-    get_current_user,
-    require_admin,
+    SECRET_KEY,
+    Admin_user,
+    Current_user,
+    Db_session,
+    Token,
+    get_password_hash,
 )
-from app.schemas import UserCreate, UserList
 
 router = APIRouter(prefix="/users", tags=["Users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -22,15 +23,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.get("/", response_model=UserList)
 def list_users(
-    session: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    session: Db_session,
+    current_user: Current_user,
 ):
     users = session.query(User).all()
     return {"users": users}
 
 
 @router.post("/test", response_model=UserPublic)
-def create_test_user(session: Session = Depends(get_db)):
+def create_test_user(session: Db_session):
     existing_user = (
         session.query(User).filter(User.username == "test-user").first()
     )
@@ -56,8 +57,8 @@ def create_test_user(session: Session = Depends(get_db)):
 @router.post("/", status_code=HTTPStatus.CREATED, response_model=UserPublic)
 def create_user(
     user: UserCreate,
-    session: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    session: Db_session,
+    current_user: Admin_user,
 ):
 
     db_user = (
@@ -89,10 +90,10 @@ def create_user(
     return db_user
 
 
-@router.put("/{user_id}", response_model=UserPublic)
-def update_user(user: User, session: Session = Depends(get_db)):
+@router.put("/{username}", response_model=UserPublic)
+def update_user(username: str, user: User, session: Db_session):
     db_user = session.scalar(
-        select(User).where(User.username == user.username)
+        select(User).where(User.username == username)
     )
     if not db_user:
         raise HTTPException(
@@ -109,7 +110,7 @@ def update_user(user: User, session: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserPublic)
 def read_users_me(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: Token, db: Db_session
 ):
     try:
         payload = decode(token, SECRET_KEY, algorithms=ALGORITHM)

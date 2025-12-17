@@ -1,12 +1,16 @@
-import pytest
-import jwt
 from http import HTTPStatus
+
+import jwt
+import pytest
 from fastapi.testclient import TestClient
-from app.security import SECRET_KEY, create_access_token, get_password_hash
-from app.main import app
+
 from app.database import get_db
+from app.main import app
 from app.models import User
+from app.security import SECRET_KEY, create_access_token, get_password_hash
+
 from .database import SessionLocalTest
+
 
 @pytest.fixture
 def session():
@@ -15,6 +19,7 @@ def session():
         yield db
     finally:
         db.close()
+
 
 @pytest.fixture
 def client(session):
@@ -57,6 +62,7 @@ def test_jwt():
 
     assert decoded["test"] == data["test"]
     assert "exp" in decoded
+
 
 def test_get_token(client, user):
     user_obj, raw_password = user

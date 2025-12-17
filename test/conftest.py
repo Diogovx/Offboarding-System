@@ -1,5 +1,7 @@
 import pytest
+
 from .database import SessionLocalTest
+
 
 @pytest.fixture
 def session():
@@ -8,5 +10,3 @@ def session():
         yield db
     finally:
         db.close()
-
-

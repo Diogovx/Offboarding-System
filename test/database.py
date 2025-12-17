@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models import table_registry
 
+from app.models import table_registry
 
 TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 

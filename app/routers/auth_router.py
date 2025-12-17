@@ -1,18 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 from http import HTTPStatus
-from app.security import verify_password, create_access_token
-from app.database import get_db
+
+from fastapi import APIRouter, HTTPException
+
 from app.models.user_model import User
+from app.security import (
+    Db_session,
+    Form_data,
+    create_access_token,
+    verify_password,
+)
 
 router = APIRouter()
 
 
 @router.post("/token")
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),
+    db: Db_session,
+    form_data: Form_data,
 ):
     user = db.query(User).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.password):

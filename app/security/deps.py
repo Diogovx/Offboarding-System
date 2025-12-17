@@ -1,11 +1,13 @@
+from typing import Annotated
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jwt import decode, ExpiredSignatureError, InvalidTokenError
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
-from app.security import SECRET_KEY, ALGORITHM
+from app.security import ALGORITHM, SECRET_KEY
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -43,7 +45,8 @@ def get_current_user(
 
 
 def require_admin(user: User = Depends(get_current_user)):
-    if user.userRole != 1:
+    admin_role = 1
+    if user.userRole != admin_role:
         raise HTTPException(
             status_code=403, detail="Admin privileges required"
         )
@@ -51,8 +54,17 @@ def require_admin(user: User = Depends(get_current_user)):
 
 
 def require_editor(user: User = Depends(get_current_user)):
-    if user.userRole > 2:
+    editor_role = 2
+    if user.userRole > editor_role:
         raise HTTPException(
             status_code=403, detail="Editor privileges required"
         )
     return user
+
+
+Db_session = Annotated[Session, Depends(get_db)]
+Current_user = Annotated[Session, Depends(get_current_user)]
+Admin_user = Annotated[Session, Depends(require_admin)]
+Token = Annotated[str, Depends(oauth2_scheme)]
+Editor_user = Annotated[Session, Depends(require_editor)]
+Form_data = Annotated[OAuth2PasswordRequestForm, Depends()]
