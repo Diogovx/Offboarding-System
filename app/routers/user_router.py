@@ -1,12 +1,13 @@
 from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
 
 from app.models import User
-from app.schemas import UserCreate, UserList, UserPublic
+from app.schemas import FilterPage, UserCreate, UserList, UserPublic
 from app.security import (
     ALGORITHM,
     SECRET_KEY,
@@ -25,8 +26,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def list_users(
     session: Db_session,
     current_user: Current_user,
+    filter_users: Annotated[FilterPage, Query()]
 ):
-    users = session.query(User).all()
+    users = session.scalars(
+        select(User).offset(filter_users.offset).limit(filter_users.limit)
+    ).all()
     return {"users": users}
 
 
