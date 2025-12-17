@@ -8,10 +8,9 @@ from .deps import (
     get_current_user,
     require_admin,
     require_editor,
+    settings,
 )
 from .security import (
-    ALGORITHM,
-    SECRET_KEY,
     create_access_token,
     get_password_hash,
     verify_password,
@@ -21,9 +20,7 @@ from .settings import Settings
 __all__ = [
     "get_password_hash",
     "verify_password",
-    "SECRET_KEY",
     "create_access_token",
-    "ALGORITHM",
     "get_current_user",
     "require_admin",
     "require_editor",
@@ -33,5 +30,6 @@ __all__ = [
     "Admin_user",
     "Current_user",
     "Editor_user",
-    "Form_data"
+    "Form_data",
+    "settings"
 ]

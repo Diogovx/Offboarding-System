@@ -9,14 +9,13 @@ from sqlalchemy import select
 from app.models import User
 from app.schemas import FilterPage, UserCreate, UserList, UserPublic
 from app.security import (
-    ALGORITHM,
-    SECRET_KEY,
     Admin_user,
     Current_user,
     Db_session,
     Token,
     get_password_hash,
 )
+from app.security.security import settings
 
 router = APIRouter(prefix="/users", tags=["Users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -117,7 +116,9 @@ def read_users_me(
     token: Token, db: Db_session
 ):
     try:
-        payload = decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        payload = decode(
+            token, settings.SECRET_KEY, algorithms=settings.ALGORITHM
+        )
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(

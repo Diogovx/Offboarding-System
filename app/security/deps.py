@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -7,9 +8,17 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User
-from app.security.security import ALGORITHM, SECRET_KEY
+from app.security.settings import Settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+@lru_cache
+def get_settings():
+    return Settings()
+
+
+settings = get_settings()
 
 
 def get_current_user(
@@ -22,7 +31,9 @@ def get_current_user(
     )
 
     try:
-        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
