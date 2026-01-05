@@ -47,3 +47,26 @@ def desativar_funcionario(
         "message": "Usuário desativado com sucesso",
         "matricula": matricula
     }
+
+#PRECISO TESTAR, NAO SEI SE ESTÁ FUNCIONANDO
+@router.post("/activate/{matricula}")
+def ativar_funcionario(
+    current_user: Editor_user,
+    matricula: str,
+    background_tasks: BackgroundTasks
+):
+    resultado = intouch_service.ativar_funcionario(matricula)
+
+    if not resultado.get("success"):
+        raise HTTPException(
+            status_code=400, 
+            detail=resultado.get("error", "Erro ao ativar usuário")
+        )
+
+    
+    background_tasks.add_task(send_email, matricula)
+
+    return {
+        "message": "Usuário ativado com sucesso",
+        "matricula": matricula
+    }
