@@ -68,11 +68,67 @@ def buscar_funcionario(matricula: str):
     except Exception as e:
         return {"erro": str(e), "sucesso": False}
 
+# PRECISO TESTAR EM FIZ NA MAO E NAO TESTEI NO POSTMAN AINDA
+def ativar_funcionario(matricula: str):
+    print(f"Iniciando processo para matrícula: {matricula}")
+    dados = buscar_funcionario(matricula)
 
+    if not dados or not dados.get('sucesso'):
+        return {"success": False, "error": "Usuário não encontrado."}
+    
+    user_id = dados['id_sistema']
+    nome = dados['nome']
+    status_atual = dados['status_atual']
+
+    print(f" Status atual: '{status_atual}'")
+
+    if status_atual == 'deactivated':
+        print(f" Usuário desativado. Mudando status de {nome} para ACTIVATED.")
+
+        url_update = f"{settings.INTOUCH_URL}/{user_id}"
+        payload = {"status": "activated"}
+        headers_update = {
+            "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
+            "Content-Type": "application/vnd.staffbase.accessors.user-update.v1+json"
+        }
+
+        try:
+            resp = requests.put(url_update, json=payload, headers=headers_update)
+            
+            if resp.status_code in [HTTPStatus.OK, HTTPStatus.NO_CONTENT]:
+                return {
+                    "success": True,
+                    "message": f"Usuário {nome} foi REATIVADO com sucesso.",
+                    "acao": "ativacao"
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"Erro na API Staffbase ao ativar: {resp.text}"
+                }
+        except Exception as e:
+            return {"success": False, "error": f"Erro de conexão: {str(e)}"}
+
+   
+    elif status_atual == 'activated':
+        return {
+            "success": True,
+            "message": f"Usuário {nome} já está ATIVO.",
+            "acao": "nenhuma"
+        }
+
+  
+    else:
+        return {
+            "success": False, 
+            "error": f"Status '{status_atual}' não permite reativação automática."
+        }
+    
+    
 def desativar_funcionario(matricula: str):
     print(f" Iniciando processo para matrícula: {matricula}")
 
-    # 1. Busca os dados atuais
+
     dados = buscar_funcionario(matricula)
 
     if not dados or not dados.get('sucesso'):
