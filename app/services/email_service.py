@@ -9,8 +9,8 @@ from app.security import Settings
 settings = Settings()
 
 
-def send_email(matricula: str):
-    now = datetime.now(ZoneInfo("America/Sao_Paulo"))
+def send_email(matricula: str, acao: str):
+    now = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S")
     sender_email = settings.EMAIL_SENDER
     password = settings.EMAIL_PASSWORD
     receiver_email = settings.EMAIL_RECEIVER
@@ -22,11 +22,12 @@ def send_email(matricula: str):
         raise RuntimeError("Variáveis de email não configuradas")
 
     msg = EmailMessage()
-    msg["Subject"] = "Usuário removido"
+    msg["Subject"] = f"Usuário {acao.upper()} - Matrícula {matricula}"
     msg["From"] = sender_email
     msg["To"] = receiver_email
     msg.set_content(
-        f"O usuário de matrícula {matricula} foi removido com sucesso do sistema. {now}"
+        f"O usuário de matrícula {matricula} foi {acao} com sucesso no sistema.\n"
+        f"Data/Hora: {now}"
     )
 
     context = ssl.create_default_context()
