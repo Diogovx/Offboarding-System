@@ -63,8 +63,7 @@ async def disable_user(
     filter_str = f"Description -like '*{payload.registration}*'"
 
     ps_lookup = f"""
-        $user = Get-ADUser -Filter "{filter_str}"
-        -Properties SamAccountName,Name,Enabled,Description,DistinguishedName
+        $user = Get-ADUser -Filter "{filter_str}" -Properties SamAccountName,Name,Enabled,Description,DistinguishedName
         if (!$user) {{
             Write-Error "Usuário não encontrado pela matrícula."
             exit 1
@@ -86,23 +85,25 @@ async def disable_user(
             status_code=500, detail=f"Erro retornado pelo AD: {lookup_output}"
         )
 
-    distinguished_name = user_data["DistinguishedName"]
+    sam = user_data["SamAccountName"]
     old_description = user_data.get("Description", "")
 
-    new_description = f"""{old_description} |
-        Desativado por {payload.performed_by} (Sistema Dismissal Assistant)"""
+    new_description = f"""{old_description} | Desativado por {payload.performed_by} (Sistema Dismissal Assistant)"""
 
-    ps_action = (
-        f'Disable-ADAccount -Identity "{distinguished_name}";'
-        f'''Set-ADUser -Identity "{distinguished_name}"
-        -Description "{new_description}";'''
-        f'Move-ADObject -Identity "{distinguished_name}" '
-        f'''-TargetPath "OU=CONTAS DESATIVADAS,OU=Usurios,
-        OU=CLADTEK DO BRASIL - Office RJ,DC=cladtekbr,DC=local";'''
-        f'''Write-Output \'{{
-            "status":"success","user":"{payload.registration}"
-        }}\''''
-    )
+    ps_action = f"""
+    $ErrorActionPreference = "Stop"
+
+    $identity = "{sam}"
+
+    Disable-ADAccount -Identity $identity
+    Set-ADUser -Identity $identity -Description "{new_description}"
+
+    $dn = (Get-ADUser -Identity $identity).DistinguishedName
+    Move-ADObject -Identity $dn -TargetPath "OU=CONTAS DESATIVADAS,OU=Usuários,OU=CLADTEK DO BRASIL - Office RJ,DC=cladtekbr,DC=local"
+
+
+    Write-Output '{{"status":"success","user":"{payload.registration}"}}'
+    """
 
     action_cmd = ["powershell.exe", "-NonInteractive", "-Command", ps_action]
 
