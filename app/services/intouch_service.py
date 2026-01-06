@@ -68,7 +68,6 @@ def buscar_funcionario(matricula: str):
     except Exception as e:
         return {"erro": str(e), "sucesso": False}
 
-# PRECISO TESTAR EM FIZ NA MAO E NAO TESTEI NO POSTMAN AINDA
 def ativar_funcionario(matricula: str):
     print(f"Iniciando processo para matrícula: {matricula}")
     dados = buscar_funcionario(matricula)
