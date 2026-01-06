@@ -18,4 +18,4 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str = ""
     EMAIL_RECEIVER: str = ""
     SMTP_SERVER: str = ""
-    PORT: int = 
+    PORT: int =
