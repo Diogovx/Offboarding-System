@@ -29,7 +29,7 @@ def consultar_usuario(
 # AQUI FICA A ROTA DE DESATIVAR O USUARIO, UTILIZANDO A MATRICULA
 @router.post("/disable/{matricula}")
 def desativar_funcionario(
-    current_user: Editor_user,
+
     matricula: str,
     background_tasks: BackgroundTasks
 ):
@@ -41,17 +41,17 @@ def desativar_funcionario(
         )
 
     # EMAIL ENVIADO EM BACKGROUND PARA OTIMIZAR
-    background_tasks.add_task(send_email, matricula)
+    background_tasks.add_task(send_email, matricula, "desativado")
 
     return {
         "message": "Usuário desativado com sucesso",
         "matricula": matricula
     }
 
-#PRECISO TESTAR, NAO SEI SE ESTÁ FUNCIONANDO
+# AQUI FICA A ROTA DE ATIVAR O USUARIO, UTILIZANDO A MATRICULA
 @router.post("/activate/{matricula}")
 def ativar_funcionario(
-    current_user: Editor_user,
+  
     matricula: str,
     background_tasks: BackgroundTasks
 ):
@@ -64,7 +64,7 @@ def ativar_funcionario(
         )
 
     
-    background_tasks.add_task(send_email, matricula)
+    background_tasks.add_task(send_email, matricula, "ativado")
 
     return {
         "message": "Usuário ativado com sucesso",
