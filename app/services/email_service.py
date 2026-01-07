@@ -4,12 +4,13 @@ from email.message import EmailMessage
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from app.security import Settings
+from app.enums import EmailActions
 
 
 settings = Settings()
 
 
-def send_email(matricula: str, acao: str):
+def send_email(matricula: str, action: EmailActions):
     now = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S")
     sender_email = settings.EMAIL_SENDER
     password = settings.EMAIL_PASSWORD
@@ -22,11 +23,11 @@ def send_email(matricula: str, acao: str):
         raise RuntimeError("Variáveis de email não configuradas")
 
     msg = EmailMessage()
-    msg["Subject"] = f"Usuário {acao.upper()} - Matrícula {matricula}"
+    msg["Subject"] = f"Usuário {action.value.upper()} - Matrícula {matricula}"
     msg["From"] = sender_email
     msg["To"] = receiver_email
     msg.set_content(
-        f"O usuário de matrícula {matricula} foi {acao} com sucesso no sistema.\n"
+        f"O usuário de matrícula {matricula} foi {action.value} com sucesso no sistema.\n"
         f"Data/Hora: {now}"
     )
 
