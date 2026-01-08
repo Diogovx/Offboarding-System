@@ -1,6 +1,9 @@
-from ..audit.audit_log_service import create_audit_log
-
+from ..audit.audit_log_service import create_audit_log, fetch_audit_logs
+from ..audit.exporters import JSONLExporter, CSVExporter
 
 __all__ = [
-    "create_audit_log"
+    "create_audit_log",
+    "JSONLExporter",
+    "CSVExporter",
+    "fetch_audit_logs",
 ]
