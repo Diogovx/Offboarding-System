@@ -9,7 +9,7 @@ from app.security import (
     Db_session
 )
 from app.schemas import AuditLogCreate
-from app.services.audit_log_service import create_audit_log
+from app.audit.audit_log_service import create_audit_log
 from app.enums import AuditAction, AuditStatus
 
 router = APIRouter(prefix="/aduser", tags=["ADUser"])

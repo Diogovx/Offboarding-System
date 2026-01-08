@@ -1,4 +1,4 @@
-from .audit_log_service import create_audit_log
+from ..audit.audit_log_service import create_audit_log
 
 
 __all__ = [

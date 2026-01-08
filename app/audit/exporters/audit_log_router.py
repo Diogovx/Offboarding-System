@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.audit_model import AuditLog
+from app.audit.audit_model import AuditLog
 from app.security import Admin_user, Db_session
 
 router = APIRouter(prefix="/logs", tags=["Audit Logs"])

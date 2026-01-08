@@ -2,13 +2,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.audit.exporters import audit_log_router
 from app.database import init_db
 from app.routers import (
     aduser_router,
     auth_router,
     system_router,
-    user_router,
-    audit_log_router
+    user_router
 )
 
 

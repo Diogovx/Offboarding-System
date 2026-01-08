@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.schemas import AuditLogCreate
-from app.models.audit_model import AuditLog
+from app.audit.audit_model import AuditLog
 
 
 def create_audit_log(
