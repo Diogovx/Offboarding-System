@@ -7,15 +7,19 @@ from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
 
 from app.models import User
-from app.schemas import FilterPage, UserCreate, UserList, UserPublic
+from app.schemas import FilterPage, UserCreate, UserList, UserPublic, AuditLogCreate
+
 from app.security import (
     Admin_user,
+    Editor_user,
     Current_user,
     Db_session,
     Token,
     get_password_hash,
 )
 from app.security.security import settings
+from app.enums import AuditAction, AuditStatus
+from app.services import create_audit_log
 
 router = APIRouter(prefix="/users", tags=["Users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -30,6 +34,19 @@ def list_users(
     users = session.scalars(
         select(User).offset(filter_users.offset).limit(filter_users.limit)
     ).all()
+
+    create_audit_log(
+        session,
+        AuditLogCreate(
+            action=AuditAction.LIST_USERS,
+            status=AuditStatus.SUCCESS,
+            message=f"Listed users offset={filter_users.offset} limit={filter_users.limit}",
+            user_id=current_user.id,
+            username=current_user.username,
+            resource="/users",
+        ),
+    )
+
     return {"users": users}
 
 
@@ -51,6 +68,18 @@ def create_test_user(session: Db_session):
         password=hashed_pwd,
         enabled=True,
     )
+    create_audit_log(
+        session,
+        AuditLogCreate(
+            action=AuditAction.CREATE_USER,
+            status=AuditStatus.SUCCESS,
+            message="Test user created",
+            user_id=None,
+            username="system",
+            resource="test-user",
+        ),
+    )
+
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -61,7 +90,7 @@ def create_test_user(session: Db_session):
 def create_user(
     user: UserCreate,
     session: Db_session,
-    current_user: Admin_user,
+    current_user: Editor_user,
 ):
 
     db_user = (
@@ -87,18 +116,59 @@ def create_user(
         enabled=True,
         userRole=user.userRole,
     )
+    try:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.CREATE_USER,
+                status=AuditStatus.SUCCESS,
+                message=f"User '{user.username}' created",
+                user_id=current_user.id,
+                username=current_user.username,
+                resource=user.username,
+            ),
+        )
+    except HTTPException:
+        create_audit_log(
+            session,
+                AuditLogCreate(
+                action=AuditAction.CREATE_USER,
+                status=AuditStatus.FAILED,
+                message="Username or email already exists",
+                user_id=current_user.id,
+                username=current_user.username,
+                resource=user.username,
+            ),
+        )
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
+
     return db_user
 
 
 @router.put("/{username}", response_model=UserPublic)
-def update_user(username: str, user: User, session: Db_session):
+def update_user(
+    username: str,
+    user: User,
+    session: Db_session,
+    current_user: Editor_user
+):
     db_user = session.scalar(
         select(User).where(User.username == username)
     )
     if not db_user:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.UPDATE_USER,
+                status=AuditStatus.FAILED,
+                message="Target user not found",
+                user_id=current_user.id,
+                username=current_user.username,
+                resource=username,
+            ),
+        )
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="User not found"
         )
@@ -108,12 +178,25 @@ def update_user(username: str, user: User, session: Db_session):
     db_user.email = user.email
     session.commit()
     session.refresh(db_user)
+
+    create_audit_log(
+        session,
+        AuditLogCreate(
+            action=AuditAction.UPDATE_USER,
+            status=AuditStatus.SUCCESS,
+            message=f"User '{username}' updated",
+            user_id=current_user.id,
+            username=current_user.username,
+            resource=username,
+        ),
+    )
+
     return db_user
 
 
 @router.get("/me", response_model=UserPublic)
 def read_users_me(
-    token: Token, db: Db_session
+    token: Token, session: Db_session, current_user: Current_user
 ):
     try:
         payload = decode(
@@ -125,19 +208,63 @@ def read_users_me(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail="Invalid authentication token",
             )
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.READ_CURRENT_USER,
+                status=AuditStatus.SUCCESS,
+                message="Read own profile",
+                user_id=current_user.id,
+                username=current_user.username,
+                resource="/users/me",
+            ),
+        )
     except ExpiredSignatureError:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.READ_CURRENT_USER,
+                status=AuditStatus.DENIED,
+                message="Invalid or expired token",
+                user_id=None,
+                username=None,
+                resource="/users/me",
+            ),
+        )
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Token has expired",
         )
     except InvalidTokenError:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.READ_CURRENT_USER,
+                status=AuditStatus.DENIED,
+                message="Invalid or expired token",
+                user_id=None,
+                username=None,
+                resource="/users/me",
+            ),
+        )
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Invalid authentication token",
         )
 
-    user = db.query(User).filter(User.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     if not user:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.READ_CURRENT_USER,
+                status=AuditStatus.FAILED,
+                message="User not found",
+                user_id=None,
+                username=None,
+                resource="/users/me",
+            ),
+        )
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="User not found"
         )
