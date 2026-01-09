@@ -33,8 +33,6 @@ def buscar_funcionario(matricula: str):
 
         json_resposta = response.json()
 
-    # tive que tratar o formato, tava vindo errado,
-    # entao vai tudo virar o mesmo tipo em lista
 
         if isinstance(json_resposta, dict) and 'data' in json_resposta:
             lista_usuarios = json_resposta['data']
@@ -45,8 +43,6 @@ def buscar_funcionario(matricula: str):
 
         if not lista_usuarios:
             return {"sucesso": False, "erro": "Usuário não encontrado."}
-
-    # tudo vai pra essa lista, sempre pegando o primeiro (o pesquisado)
 
         usuario_bruto = lista_usuarios[0]
 
@@ -68,7 +64,7 @@ def buscar_funcionario(matricula: str):
     except Exception as e:
         return {"erro": str(e), "sucesso": False}
 
-def ativar_funcionario(matricula: str):
+async def ativar_funcionario(matricula: str):
     print(f"Iniciando processo para matrícula: {matricula}")
     dados = buscar_funcionario(matricula)
 
@@ -124,7 +120,7 @@ def ativar_funcionario(matricula: str):
         }
     
     
-def desativar_funcionario(matricula: str):
+async def desativar_funcionario(matricula: str):
     print(f" Iniciando processo para matrícula: {matricula}")
 
 
@@ -138,9 +134,6 @@ def desativar_funcionario(matricula: str):
     status_atual = dados['status_atual']
 
     print(f" Status atual: '{status_atual}'")
-
-
-# 1º - SE O USUÁRIO FOR ATIVADO, NAO PODEMOS DELETAR, SÓ DESATIVAR, LOGO:
 
     if status_atual == 'activated':
         print(" Usuário ativo. Mudando status para DEACTIVATED.")
@@ -168,10 +161,6 @@ def desativar_funcionario(matricula: str):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-# 2º - SE O USUÁRIO NAO FOR ATIVO E FOR PENDENTE
-# (recebeu o email e nao ativou a conta), DELETA.
-# Pesquisei e esses outros dois são
-# só pra garantir a segurança caso tenha algum sinônimo no banco)
 
     elif status_atual in ['pending', 'created', 'invited']:
         print(" Usuário pendente/criado. Executando EXCLUSÃO definitiva.")
