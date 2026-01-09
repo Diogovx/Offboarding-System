@@ -58,7 +58,7 @@ async def get_user(
 
 @router.post("/disable")
 async def disable_user(
-    payload: DisableUserRequest, session: Editor_user
+    payload: DisableUserRequest, session: Current_user
 ):
     filter_str = f"Description -like '*{payload.registration}*'"
 
