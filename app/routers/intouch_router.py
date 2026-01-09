@@ -13,7 +13,7 @@ router = APIRouter(prefix="/intouch", tags=["Intouch"])
 
 
 @router.get("/{matricula}")
-def consultar_usuario(
+async def consultar_usuario(
     current_user: Current_user,
     matricula: str
 ):
@@ -29,12 +29,12 @@ def consultar_usuario(
 
 
 @router.post("/disable/{matricula}")
-def desativar_funcionario(
+async def desativar_funcionario(
     current_user: Current_user,
     matricula: str,
     background_tasks: BackgroundTasks
 ):
-    resultado = intouch_service.desativar_funcionario(matricula)
+    resultado = await intouch_service.desativar_funcionario(matricula)
 
     if not resultado:
         raise HTTPException(
@@ -50,12 +50,12 @@ def desativar_funcionario(
     }
 
 @router.post("/activate/{matricula}")
-def ativar_funcionario(
+async def ativar_funcionario(
     current_user: Current_user,
     matricula: str,
     background_tasks: BackgroundTasks
 ):
-    resultado = intouch_service.ativar_funcionario(matricula)
+    resultado = await intouch_service.ativar_funcionario(matricula)
 
     if not resultado.get("success"):
         raise HTTPException(
