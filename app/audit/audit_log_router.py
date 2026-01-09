@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Response, BackgroundTasks, HTTPException
+from fastapi import APIRouter, Depends, Query, Response, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -64,14 +64,28 @@ def export_audit_logs_async(
     format: Literal["csv", "jsonl"],
     session: Db_session,
     current_user: Admin_user,
+    request: Request,
     action: AuditAction | None = Query(None),
     username: str | None = Query(None),
     status: AuditStatus | None = Query(None),
     date_from: datetime | None = Query(None),
     date_to: datetime | None = Query(None),
-    page: int = 1,
-    limit: int = 100,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10000, ge=1, le=50000),
 ):
+    limit_days = 90
+    if date_from and date_to:
+        if date_to < date_from:
+            raise HTTPException(
+                status_code=400,
+                detail="date_to must be after date_from"
+            )
+
+        if (date_to - date_from).days > limit_days:
+            raise HTTPException(
+                status_code=400,
+                detail="Date range cannot exceed 90 days"
+            )
     if date_from and not date_to:
         date_to = date_from + timedelta(days=1)
 
@@ -100,17 +114,21 @@ def export_audit_logs_async(
         AuditLogCreate(
             action=AuditAction.EXPORT_AUDIT_LOGS,
             status=AuditStatus.SUCCESS,
-            message="Audit log export started",
+            message=f"Audit log export started ({format} format)",
             user_id=current_user.id,
             username=current_user.username,
             resource=filename,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent")
         ),
     )
 
     return {
         "job_id": job_id,
         "status": "processing",
+        "format": format,
         "download_url": f"/logs/export/{filename}",
+        "message": "Export is being processed. Check download_url in a few moments."
     }
 
 
