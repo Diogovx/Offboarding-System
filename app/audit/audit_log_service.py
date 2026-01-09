@@ -102,6 +102,8 @@ def validate_filename(filename: str) -> str:
 
 
 def safe_export_path(filename: str) -> Path:
+    ALLOWED_EXTENSIONS = {".csv", ".jsonl", ".zip"}
+
     filename = validate_filename(filename)
 
     base_dir = EXPORT_DIR.resolve()
@@ -109,5 +111,8 @@ def safe_export_path(filename: str) -> Path:
 
     if not str(file_path).startswith(str(base_dir)):
         raise ValueError("Path traversal detected")
+
+    if file_path.suffix not in ALLOWED_EXTENSIONS:
+        raise ValueError("Extension not allowed")
 
     return file_path

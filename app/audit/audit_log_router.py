@@ -135,7 +135,7 @@ def export_audit_logs_async(
 @router.get("/export/{filename}")
 def download_export(
     filename: str,
-    _: Admin_user,
+    current_user: Admin_user,
     request: Request,
     session: Db_session
 ):
@@ -144,15 +144,15 @@ def download_export(
 
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="File not ready")
-    except:
+    except Exception:
         create_audit_log(
             session,
             AuditLogCreate(
                 action=AuditAction.EXPORT_AUDIT_LOGS,
                 status=AuditStatus.FAILED,
                 message=f"Path traversal attempt detected: {filename}",
-                user_id=_.id,
-                username=_.username,
+                user_id=current_user.id,
+                username=current_user.username,
                 resource=filename,
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent")
