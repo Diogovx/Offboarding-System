@@ -4,15 +4,15 @@ from app.services.execute_service import execute_offboarding
 
 router = APIRouter(prefix="/offboarding", tags=["offboarding"])
 
-@router.post("/execute/{matricula}")
+@router.post("/execute/{registration}")
 async def execute(
-    matricula: str, 
+    registration: str, 
     current_user: Current_user,
     background_tasks: BackgroundTasks,
     
 ):
     resultado = await execute_offboarding(
-    matricula, 
+    registration, 
     current_user, 
     background_tasks
     )

@@ -1,9 +1,9 @@
 from enum import Enum, IntEnum
 
 class EmailActions(str, Enum):
-    CONSULT = "consultado"
-    ACTIVATE = "ativado"
-    DISABLE = "desativado"
+    CONSULT = "consult"
+    ACTIVATE = "activate"
+    DISABLE = "disable"
 
     @classmethod
     def get_by_id(cls, action_id: int):
