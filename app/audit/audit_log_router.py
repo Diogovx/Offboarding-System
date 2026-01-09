@@ -28,6 +28,19 @@ def list_logs(
     page: int = 1,
     limit: int = 100,
 ):
+    limit_days = 90
+    if date_from and date_to:
+        if date_to < date_from:
+            raise HTTPException(
+                status_code=400,
+                detail="date_to must be after date_from"
+            )
+
+        if (date_to - date_from).days > limit_days:
+            raise HTTPException(
+                status_code=400,
+                detail="Date range cannot exceed 90 days"
+            )
     if date_from and not date_to:
         date_to = date_from + timedelta(days=1)
 
