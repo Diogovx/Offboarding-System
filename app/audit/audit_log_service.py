@@ -8,9 +8,12 @@ from .audit_serializer import audit_log_to_dict
 from pathlib import Path
 from app.audit.exporters import CSVExporter, JSONLExporter
 from app.database import SessionLocal
+import re
 
 EXPORT_DIR = Path("exports")
 EXPORT_DIR.mkdir(exist_ok=True)
+FILENAME_RE = re.compile(r"^[a-zA-Z0-9._-]+$")
+
 
 def create_audit_log(
     db: Session,
@@ -86,3 +89,25 @@ def export_audit_logs_task(
 
     finally:
         session.close()
+
+
+def validate_filename(filename: str) -> str:
+    if not filename:
+        raise ValueError("Empty filename")
+
+    if not FILENAME_RE.match(filename):
+        raise ValueError("Filename contains invalid characters.s")
+
+    return filename
+
+
+def safe_export_path(filename: str) -> Path:
+    filename = validate_filename(filename)
+
+    base_dir = EXPORT_DIR.resolve()
+    file_path = (base_dir / filename).resolve()
+
+    if not str(file_path).startswith(str(base_dir)):
+        raise ValueError("Path traversal detected")
+
+    return file_path

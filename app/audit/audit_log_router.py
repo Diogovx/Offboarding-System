@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.audit.audit_model import AuditLog
 from app.security import Admin_user, Db_session
-from app.services import JSONLExporter, CSVExporter, fetch_audit_logs, create_audit_log, export_audit_logs_task
+from app.services import fetch_audit_logs, create_audit_log, export_audit_logs_task, safe_export_path
 from app.schemas import AuditLogCreate
 from typing import Literal
 from app.enums import AuditAction, AuditStatus
@@ -136,12 +136,28 @@ def export_audit_logs_async(
 def download_export(
     filename: str,
     _: Admin_user,
+    request: Request,
+    session: Db_session
 ):
-    file_path = Path("exports") / filename
+    try:
+        file_path = safe_export_path(filename)
 
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not ready")
-
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="File not ready")
+    except:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.EXPORT_AUDIT_LOGS,
+                status=AuditStatus.FAILED,
+                message=f"Path traversal attempt detected: {filename}",
+                user_id=_.id,
+                username=_.username,
+                resource=filename,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent")
+            ),
+        )
     return FileResponse(
         path=file_path,
         media_type="application/octet-stream",
