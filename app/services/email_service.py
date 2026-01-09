@@ -10,7 +10,7 @@ from app.enums import EmailActions
 settings = Settings()
 
 
-def send_email(matricula: str, action: EmailActions):
+async def send_email(matricula: str, action: EmailActions):
     now = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S")
     sender_email = settings.EMAIL_SENDER
     password = settings.EMAIL_PASSWORD
