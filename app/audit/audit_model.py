@@ -1,8 +1,10 @@
-from sqlalchemy import String, func, DateTime
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
 from uuid import UUID
-from app.models import table_registry, SqliteUUID
+
+from sqlalchemy import DateTime, String, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.models import SqliteUUID, table_registry
 
 
 @table_registry.mapped

@@ -1,10 +1,11 @@
-from .exporter_interface import AuditLogExporter
 import csv
 import io
 
+from .exporter_interface import AuditLogExporter
+
 
 class CSVExporter(AuditLogExporter):
-    def export(self, logs: list[dict]) -> bytes:
+    def export(self, logs: list[dict]) -> bytes:  # noqa: PLR6301
         if not logs:
             return b""
 

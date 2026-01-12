@@ -2,17 +2,17 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException, Request
 
+from app.enums import AuditAction, AuditStatus
 from app.models.user_model import User
+from app.schemas import AuditLogCreate
 from app.security import (
+    Current_user,
     Db_session,
     Form_data,
     create_access_token,
     verify_password,
 )
 from app.services import create_audit_log
-from app.schemas import AuditLogCreate
-from app.enums import AuditAction, AuditStatus
-from app.security import Current_user
 
 router = APIRouter()
 

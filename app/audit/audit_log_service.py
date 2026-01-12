@@ -1,14 +1,15 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-from app.schemas import AuditLogCreate 
-from datetime import datetime
-from app.audit.audit_model import AuditLog
-from app.enums import AuditAction, AuditStatus
-from .audit_serializer import audit_log_to_dict
+import re
 from pathlib import Path
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.audit.audit_model import AuditLog
 from app.audit.exporters import CSVExporter, JSONLExporter
 from app.database import SessionLocal
-import re
+from app.schemas import AuditLogCreate, AuditLogListFilters
+
+from .audit_serializer import audit_log_to_dict
 
 EXPORT_DIR = Path("exports")
 EXPORT_DIR.mkdir(exist_ok=True)
@@ -28,38 +29,32 @@ def create_audit_log(
 def fetch_audit_logs(
     session: Session,
     *,
-    action: AuditAction | None = None,
-    username: str | None = None,
-    status: AuditStatus | None = None,
-    date_from: datetime | None = None,
-    date_to: datetime | None = None,
-    page: int = 1,
-    limit: int = 100,
+    filters: AuditLogListFilters
 ) -> list[dict]:
-    offset = (page - 1) * limit
+    offset = (filters.page - 1) * filters.limit
 
     stmt = select(AuditLog)
 
-    if action:
-        stmt = stmt.where(AuditLog.action == action)
+    if filters.action:
+        stmt = stmt.where(AuditLog.action == filters.action)
 
-    if username:
-        stmt = stmt.where(AuditLog.username == username)
+    if filters.username:
+        stmt = stmt.where(AuditLog.username == filters.username)
 
-    if status:
-        stmt = stmt.where(AuditLog.status == status)
+    if filters.status:
+        stmt = stmt.where(AuditLog.status == filters.status)
 
-    if date_from:
-        stmt = stmt.where(AuditLog.created_at >= date_from)
+    if filters.date_from:
+        stmt = stmt.where(AuditLog.created_at >= filters.date_from)
 
-    if date_to:
-        stmt = stmt.where(AuditLog.created_at <= date_to)
+    if filters.date_to:
+        stmt = stmt.where(AuditLog.created_at <= filters.date_to)
 
     stmt = (
         stmt
         .order_by(AuditLog.created_at.desc())
         .offset(offset)
-        .limit(limit)
+        .limit(filters.limit)
     )
 
     logs = session.execute(stmt).scalars().all()
@@ -70,12 +65,12 @@ def fetch_audit_logs(
 def export_audit_logs_task(
     *,
     format: str,
-    filters: dict,
+    filters: AuditLogListFilters,
     filename: str,
 ):
     session = SessionLocal()
     try:
-        logs = fetch_audit_logs(session=session, **filters)
+        logs = fetch_audit_logs(session=session, filters=filters)
 
         exporter = {
             "csv": CSVExporter(),
@@ -86,7 +81,9 @@ def export_audit_logs_task(
 
         file_path = EXPORT_DIR / filename
         file_path.write_bytes(data)
-
+    except Exception as exc:
+        print(f"[EXPORT ERROR] {exc}")
+        raise
     finally:
         session.close()
 

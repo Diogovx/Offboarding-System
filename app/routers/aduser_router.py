@@ -1,16 +1,13 @@
 import json
 from subprocess import PIPE, STDOUT, run
 
-from fastapi import APIRouter, HTTPException, status, Request
+from fastapi import APIRouter, HTTPException, Request, status
 
-from app.models import ADUser, DisableUserRequest
-from app.security import (
-    Current_user,
-    Db_session
-)
-from app.schemas import AuditLogCreate
 from app.audit.audit_log_service import create_audit_log
 from app.enums import AuditAction, AuditStatus
+from app.models import ADUser, DisableUserRequest
+from app.schemas import AuditLogCreate
+from app.security import Current_user, Db_session
 
 router = APIRouter(prefix="/aduser", tags=["ADUser"])
 
