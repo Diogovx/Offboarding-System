@@ -6,9 +6,9 @@ class ADUser(BaseModel):
     SamAccountName: str
     Enabled: bool
     DistinguishedName: str
-    Description: str
+    Description: str | None
 
 
 class DisableUserRequest(BaseModel):
     registration: str
-    performed_by: str  # nome de quem desativou no sistema
+    performed_by: str

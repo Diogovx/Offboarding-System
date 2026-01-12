@@ -1,13 +1,13 @@
 import json
 from subprocess import PIPE, STDOUT, run
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
+from app.audit.audit_log_service import create_audit_log
+from app.enums import AuditAction, AuditStatus
 from app.models import ADUser, DisableUserRequest
-from app.security import (
-    Current_user,
-    Editor_user,
-)
+from app.schemas import AuditLogCreate
+from app.security import Current_user, Db_session
 
 router = APIRouter(prefix="/aduser", tags=["ADUser"])
 
@@ -15,6 +15,8 @@ router = APIRouter(prefix="/aduser", tags=["ADUser"])
 @router.get("/", response_model=list[ADUser])
 async def get_user(
     session: Current_user,
+    request: Request,
+    db: Db_session,
     registration: str | None = None,
 ):
     if not registration:
@@ -27,9 +29,7 @@ async def get_user(
         "powershell.exe",
         "-NonInteractive",
         "-Command",
-        f'''Get-AdUser -Filter "{filter_str}"
-        -Properties SamAccountName,Name,Enabled,Description,DistinguishedName
-        | ConvertTo-Json -Compress''',
+        f'''Get-AdUser -Filter "{filter_str}" -Properties SamAccountName,Name,Enabled,Description,DistinguishedName | ConvertTo-Json -Compress''',
     ]
 
     command_output = run(command_args, check=False, stdout=PIPE, stderr=STDOUT)
@@ -48,17 +48,47 @@ async def get_user(
         else:
             users_list = []
 
+        create_audit_log(
+            db,
+            AuditLogCreate(
+                action=AuditAction.SEARCH_AD_USER,
+                status=AuditStatus.SUCCESS,
+                message="User research conducted",
+                user_id=session.id,
+                username=session.username,
+                resource=registration or "*",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
+
         return [ADUser.model_validate(user) for user in users_list]
     except json.JSONDecodeError:
+        create_audit_log(
+            db,
+            AuditLogCreate(
+                action=AuditAction.SEARCH_AD_USER,
+                status=AuditStatus.FAILED,
+                message=f"Invalid JSON returned by AD: {output_string}",
+                user_id=session.id,
+                username=session.username,
+                resource=registration or "*",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erro ao consultar Active Directory.",
+            detail="Error querying Active Directory.",
         )
 
 
 @router.post("/disable")
 async def disable_user(
-    payload: DisableUserRequest, session: Editor_user
+    payload: DisableUserRequest,
+    session: Current_user,
+    request: Request,
+    db: Db_session
 ):
     filter_str = f"Description -like '*{payload.registration}*'"
 
@@ -111,9 +141,36 @@ async def disable_user(
     output = result.stdout.decode("utf-8", errors="ignore").strip()
 
     try:
+        create_audit_log(
+            db,
+            AuditLogCreate(
+                action=AuditAction.DISABLE_AD_USER,
+                status=AuditStatus.SUCCESS,
+                message="User deactivated and moved successfully.",
+                user_id=session.id,
+                username=session.username,
+                resource=payload.registration,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
+
         return json.loads(output)
     except Exception:
+        create_audit_log(
+            db,
+            AuditLogCreate(
+                action=AuditAction.DISABLE_AD_USER,
+                status=AuditStatus.FAILED,
+                message=f"Failed to deactivate user: {output}",
+                user_id=session.id,
+                username=session.username,
+                resource=payload.registration,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ocorreu um erro ao desativar/mover o usuário: {output}",
+            detail=f"An error occurred while disabling/moving the user: {output}",
         )

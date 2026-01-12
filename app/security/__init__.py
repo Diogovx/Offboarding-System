@@ -1,3 +1,4 @@
+from ..audit.audit_deps import Audit_log_list_filters
 from .deps import (
     Admin_user,
     Current_user,
@@ -31,5 +32,6 @@ __all__ = [
     "Current_user",
     "Editor_user",
     "Form_data",
-    "settings"
+    "settings",
+    "Audit_log_list_filters"
 ]
