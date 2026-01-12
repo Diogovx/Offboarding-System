@@ -8,11 +8,11 @@ from app.enums import EmailActions
 router = APIRouter(prefix="/intouch", tags=["Intouch"])
 
 @router.get("/{registration}")
-async def consultar_usuario(
+async def search_user(
     current_user: Current_user,
     registration: str
 ):
-    res_intouch = intouch_service.buscar_funcionario(registration)
+    res_intouch = intouch_service.search_user(registration)
 
     if not res_intouch:
         raise HTTPException(
@@ -57,7 +57,7 @@ async def activate_user_intouch(
             status_code=400, 
             detail=res_intouch.get("error", "Error while activating user")
         )
-
+    
     action = EmailActions.get_by_id(2)
     background_tasks.add_task(send_email, registration, action)
 
