@@ -1,10 +1,17 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 
 from app.audit import audit_log_router
 from app.database import init_db
-from app.routers import aduser_router, auth_router, execute_router, system_router, user_router, intouch_router
+from app.routers import (
+    aduser_router,
+    auth_router,
+    execute_router,
+    intouch_router,
+    system_router,
+    user_router,
+)
 from app.security import start_scheduler
 
 

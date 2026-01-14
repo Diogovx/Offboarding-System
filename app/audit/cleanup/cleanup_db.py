@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
-from sqlalchemy.orm import Session
-from app.database import SessionLocal
-from app.audit.audit_model import AuditLog
-from app.security import RETENTION_POLICY
+
 from sqlalchemy import delete, func, select
+from sqlalchemy.orm import Session
+
+from app.audit.audit_model import AuditLog
+from app.database import SessionLocal
+from app.security import RETENTION_POLICY
 
 
 def cleanup_audit_logs_db() -> int:

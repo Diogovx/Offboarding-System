@@ -1,6 +1,7 @@
+import logging
+
 from app.audit.cleanup.cleanup_db import cleanup_audit_logs_db
 from app.audit.cleanup.cleanup_files import cleanup_export_files
-import logging
 
 logger = logging.getLogger(__name__)
 

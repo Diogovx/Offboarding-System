@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from app.audit.audit_log_service import EXPORT_DIR
 
+from app.audit.audit_log_service import EXPORT_DIR
 
 EXPORT_DIR = Path(EXPORT_DIR)
 

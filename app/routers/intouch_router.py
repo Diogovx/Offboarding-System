@@ -1,11 +1,14 @@
 from http import HTTPStatus
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from app.security import Current_user, Editor_user
+
+from app.enums import EmailActions
+from app.security import Current_user
 from app.services import intouch_service
 from app.services.email_service import send_email
-from app.enums import EmailActions
 
 router = APIRouter(prefix="/intouch", tags=["Intouch"])
+
 
 @router.get("/{registration}")
 async def search_user(
@@ -22,6 +25,7 @@ async def search_user(
 
     return res_intouch
 
+
 @router.post("/disable/{registration}")
 async def deactivate_user_intouch(
     current_user: Current_user,
@@ -32,7 +36,7 @@ async def deactivate_user_intouch(
 
     if not res_intouch:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="Error while deactivating user"
         )
 
@@ -44,6 +48,7 @@ async def deactivate_user_intouch(
         "registration": registration
     }
 
+
 @router.post("/activate/{registration}")
 async def activate_user_intouch(
     current_user: Current_user,
@@ -54,10 +59,10 @@ async def activate_user_intouch(
 
     if not res_intouch.get("success"):
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=res_intouch.get("error", "Error while activating user")
         )
-    
+
     action = EmailActions.get_by_id(2)
     background_tasks.add_task(send_email, registration, action)
 

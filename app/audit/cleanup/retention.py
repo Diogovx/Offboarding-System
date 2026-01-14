@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from app.enums import AuditAction
 
 RETENTION_POLICY = {
