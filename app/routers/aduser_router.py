@@ -85,7 +85,7 @@ async def get_user(
 
 @router.post("/disable")
 async def disable_user(
-    payload: DisableUserRequest,
+    payload: DisableUser  Request,
     session: Current_user,
     request: Request,
     db: Db_session

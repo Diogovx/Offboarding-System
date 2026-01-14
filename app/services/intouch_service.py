@@ -9,16 +9,16 @@ settings = Settings()
 HEADERS = {"Authorization": f"Basic {settings.INTOUCH_TOKEN}"}
 
 
-def buscar_funcionario(matricula: str):
+def search_user(registration: str):
 
-    print(f" Buscando o usuário da matrícula: {matricula}")
+    print(f" Searching for the user with the registration number: {registration}")
 
     if not settings.INTOUCH_TOKEN:
-        return {"erro": "Token não configurado"}
+        return {"erro": "Token not configured"}
     if not settings.INTOUCH_URL:
-        return {"erro": "URL não configurada"}
+        return {"erro": "URL not configured"}
 
-    filtro = f'profile.employeeid eq "{matricula}"'
+    filtro = f'profile.employeeid eq "{registration}"'
 
     try:
         response = requests.get(
@@ -27,62 +27,60 @@ def buscar_funcionario(matricula: str):
 
         if response.status_code != HTTPStatus.OK:
             return {
-                "erro": f"Erro API Staffbase: {response.status_code}",
-                "sucesso": False, "detalhe": response.text
+                "erro": f"Staffbase API Error: {response.status_code}",
+                "success": False, "details": response.text
             }
 
-        json_resposta = response.json()
+        json_res = response.json()
 
-    # tive que tratar o formato, tava vindo errado,
-    # entao vai tudo virar o mesmo tipo em lista
-
-        if isinstance(json_resposta, dict) and 'data' in json_resposta:
-            lista_usuarios = json_resposta['data']
-        elif isinstance(json_resposta, list):
-            lista_usuarios = json_resposta
+       
+        if isinstance(json_res, dict) and 'data' in json_res:
+            list_users = json_res['data']
+        elif isinstance(json_res, list):
+            list_users = json_res
         else:
-            lista_usuarios = []
+            list_users = []
 
-        if not lista_usuarios:
-            return {"sucesso": False, "erro": "Usuário não encontrado."}
+        if not list_users:
+            return {"success": False, "erro": "User not found."}
 
-    # tudo vai pra essa lista, sempre pegando o primeiro (o pesquisado)
+        raw_user = list_users[0]
 
-        usuario_bruto = lista_usuarios[0]
-
-        primeiro_nome = usuario_bruto.get('firstName', '')
-        sobrenome = usuario_bruto.get('lastName', '')
-        nome_completo = f"{primeiro_nome} {sobrenome}".strip()
+        first_name = raw_user.get('firstName', '')
+        surname = raw_user.get('lastName', '')
+        full_name = f"{first_name} {surname}".strip()
 
         return {
-            "sucesso": True,
-            "encontrado": True,
-            "id_sistema": usuario_bruto.get('id'),
-            "nome": nome_completo,
-            "email": usuario_bruto.get('profile', {}).get('workemail'),
-            "cargo": usuario_bruto.get('position'),
-            "status_atual": usuario_bruto.get('status'),
-            "Matricula": matricula
+            "success": True,
+            "found": True,
+            "id_system": raw_user.get('id'),
+            "name": full_name,
+            "email": raw_user.get('profile', {}).get('workemail'),
+            "role": raw_user.get('position'),
+            "current_status": raw_user.get('status'),
+            "registration": registration
         }
 
     except Exception as e:
-        return {"erro": str(e), "sucesso": False}
+        return {"erro": str(e), "success": False}
 
-def ativar_funcionario(matricula: str):
-    print(f"Iniciando processo para matrícula: {matricula}")
-    dados = buscar_funcionario(matricula)
+async def activate_user_intouch(registration: str):
 
-    if not dados or not dados.get('sucesso'):
-        return {"success": False, "error": "Usuário não encontrado."}
+    print(f"Starting the enrollment process: {registration}")
+    data = search_user(registration)
+
+    if not data or not data.get('success'):
+        return {"success": False, "error": "User not found."}
     
-    user_id = dados['id_sistema']
-    nome = dados['nome']
-    status_atual = dados['status_atual']
+    user_id = data['id_system']
+    name = data['name']
+    current_status = data['current_status']
 
-    print(f" Status atual: '{status_atual}'")
+    print(f" Current_status: '{current_status}'")
 
-    if status_atual == 'deactivated':
-        print(f" Usuário desativado. Mudando status de {nome} para ACTIVATED.")
+
+    if current_status == 'deactivated':
+        print(f" User deactivated. Changing status of {name} to activated.")
 
         url_update = f"{settings.INTOUCH_URL}/{user_id}"
         payload = {"status": "activated"}
@@ -97,53 +95,51 @@ def ativar_funcionario(matricula: str):
             if resp.status_code in [HTTPStatus.OK, HTTPStatus.NO_CONTENT]:
                 return {
                     "success": True,
-                    "message": f"Usuário {nome} foi REATIVADO com sucesso.",
-                    "acao": "ativacao"
+                    "message": f"User {name} was successfully renewed.",
+                    "acao": "Activation"
                 }
             else:
                 return {
                     "success": False,
-                    "error": f"Erro na API Staffbase ao ativar: {resp.text}"
+                    "error": f"Error in the Staffbase API when activating: {resp.text}"
                 }
         except Exception as e:
-            return {"success": False, "error": f"Erro de conexão: {str(e)}"}
+            return {"success": False, "error": f"Connection error: {str(e)}"}
 
    
-    elif status_atual == 'activated':
+    elif current_status == 'activated':
         return {
             "success": True,
-            "message": f"Usuário {nome} já está ATIVO.",
-            "acao": "nenhuma"
+            "message": f"User {name}: The user is already active.",
+            "acao": "none"
         }
 
   
     else:
         return {
             "success": False, 
-            "error": f"Status '{status_atual}' não permite reativação automática."
+            "error": f"Status '{current_status}' does not allow automatic reactivation."
         }
     
     
-def desativar_funcionario(matricula: str):
-    print(f" Iniciando processo para matrícula: {matricula}")
+async def deactivate_user_intouch(registration: str):
 
+    print(f" Starting the enrollment process: {registration}")
 
-    dados = buscar_funcionario(matricula)
+    data = search_user(registration)
 
-    if not dados or not dados.get('sucesso'):
-        return {"success": False, "error": "Usuário não encontrado."}
+    if not data or not data.get('success'):
+        return {"success": False, "error": "User not found."}
 
-    user_id = dados['id_sistema']
-    nome = dados['nome']
-    status_atual = dados['status_atual']
+    user_id = data['id_system']
+    name = data['name']
+    current_status = data['current_status']
 
-    print(f" Status atual: '{status_atual}'")
+    print(f" Current status: '{current_status}'")
 
-
-# 1º - SE O USUÁRIO FOR ATIVADO, NAO PODEMOS DELETAR, SÓ DESATIVAR, LOGO:
-
-    if status_atual == 'activated':
-        print(" Usuário ativo. Mudando status para DEACTIVATED.")
+   
+    if current_status == 'activated':
+        print(" Active user. Changing status to DEACTIVATED.")
 
         url_update = f"{settings.INTOUCH_URL}/{user_id}"
         payload = {"status": "deactivated"}
@@ -157,24 +153,20 @@ def desativar_funcionario(matricula: str):
             if resp.status_code == HTTPStatus.OK or resp.status_code == HTTPStatus.NO_CONTENT:
                 return {
                     "success": True,
-                    "message": f"Usuário {nome} foi DESATIVADO com sucesso.",
+                    "message": f"User {name} was successfully DEACTIVATED.",
                     "acao": "desativacao"
                 }
             else:
                 return {
                         "success": False,
-                        "error": f"Erro ao desativar: {resp.text}"
+                        "error": f"Error during deactivation: {resp.text}"
                     }
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-# 2º - SE O USUÁRIO NAO FOR ATIVO E FOR PENDENTE
-# (recebeu o email e nao ativou a conta), DELETA.
-# Pesquisei e esses outros dois são
-# só pra garantir a segurança caso tenha algum sinônimo no banco)
-
-    elif status_atual in ['pending', 'created', 'invited']:
-        print(" Usuário pendente/criado. Executando EXCLUSÃO definitiva.")
+  
+    elif current_status in ['pending', 'created', 'invited']:
+        print(" Pending/Created user. Executing definitive DELETION.")
 
         url_delete = f"{settings.INTOUCH_URL}/{user_id}"
 
@@ -183,31 +175,26 @@ def desativar_funcionario(matricula: str):
             if resp.status_code == HTTPStatus.OK or resp.status_code == HTTPStatus.NO_CONTENT:
                 return {
                     "success": True,
-                    "message": f"Convite do usuário {nome} foi EXCLUÍDO com sucesso.",
+                    "message": f"User invitation {name} was successfully DELETED.",
                     "acao": "exclusao"
                 }
             else:
-                return {"success": False, "error": f"Erro ao deletar: {resp.text}"}
+                return {"success": False, "error": f"Error during deletion: {resp.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-
-# 3º - TA DESATIVADO OU PROTEGIDO, nao faz NADA
-
-    elif status_atual in ['contact', 'deactivated']:
-        print(f" Status '{status_atual}' é protegido ou já processado. Nenhuma ação.")
+   
+    elif current_status in ['contact', 'deactivated']:
+        print(f" Status '{current_status}' is protected or already processed. No action taken.")
         return {
-            "success": True,  # Retorna True pq não foi erro, foi uma decisão lógica
-            "message": f"Usuário {nome} está como '{status_atual}' e não precisa ser alterado.",
+            "success": True,  
+            "message": f"User {name} is set as '{current_status}' and does not need to be changed.",
             "acao": "nenhuma"
         }
 
-    # 4º - se for desconhecido, cancela
+   
     else:
         return {
             "success": False,
-            "error": f"""
-                Status desconhecido ('{status_atual}').
-                Operação cancelada por segurança.
-            """
+            "error": f"Unknown status ('{current_status}'). Operation canceled for safety."
         }
