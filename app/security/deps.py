@@ -74,8 +74,8 @@ def require_editor(user: User = Depends(get_current_user)):
 
 
 Db_session = Annotated[Session, Depends(get_db)]
-Current_user = Annotated[Session, Depends(get_current_user)]
-Admin_user = Annotated[Session, Depends(require_admin)]
+Current_user = Annotated[User, Depends(get_current_user)]
+Admin_user = Annotated[User, Depends(require_admin)]
 Token = Annotated[str, Depends(oauth2_scheme)]
-Editor_user = Annotated[Session, Depends(require_editor)]
+Editor_user = Annotated[User, Depends(require_editor)]
 Form_data = Annotated[OAuth2PasswordRequestForm, Depends()]

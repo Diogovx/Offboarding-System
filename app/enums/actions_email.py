@@ -1,4 +1,5 @@
-from enum import Enum, IntEnum
+from enum import Enum
+
 
 class EmailActions(str, Enum):
     CONSULT = "consult"
@@ -7,6 +8,6 @@ class EmailActions(str, Enum):
 
     @classmethod
     def get_by_id(cls, action_id: int):
-       
+
         mapping = {1: cls.CONSULT, 2: cls.ACTIVATE, 3: cls.DISABLE}
         return mapping.get(action_id, cls.CONSULT)

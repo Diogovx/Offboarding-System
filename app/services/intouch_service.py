@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from datetime import datetime
+
 import requests
 
 from app.security import Settings
@@ -33,7 +33,6 @@ def search_user(registration: str):
 
         json_res = response.json()
 
-       
         if isinstance(json_res, dict) and 'data' in json_res:
             list_users = json_res['data']
         elif isinstance(json_res, list):
@@ -64,6 +63,7 @@ def search_user(registration: str):
     except Exception as e:
         return {"erro": str(e), "success": False}
 
+
 async def activate_user_intouch(registration: str):
 
     print(f"Starting the enrollment process: {registration}")
@@ -71,13 +71,12 @@ async def activate_user_intouch(registration: str):
 
     if not data or not data.get('success'):
         return {"success": False, "error": "User not found."}
-    
+
     user_id = data['id_system']
     name = data['name']
     current_status = data['current_status']
 
     print(f" Current_status: '{current_status}'")
-
 
     if current_status == 'deactivated':
         print(f" User deactivated. Changing status of {name} to activated.")
@@ -91,7 +90,7 @@ async def activate_user_intouch(registration: str):
 
         try:
             resp = requests.put(url_update, json=payload, headers=headers_update)
-            
+
             if resp.status_code in [HTTPStatus.OK, HTTPStatus.NO_CONTENT]:
                 return {
                     "success": True,
@@ -106,7 +105,6 @@ async def activate_user_intouch(registration: str):
         except Exception as e:
             return {"success": False, "error": f"Connection error: {str(e)}"}
 
-   
     elif current_status == 'activated':
         return {
             "success": True,
@@ -114,14 +112,13 @@ async def activate_user_intouch(registration: str):
             "acao": "none"
         }
 
-  
     else:
         return {
-            "success": False, 
+            "success": False,
             "error": f"Status '{current_status}' does not allow automatic reactivation."
         }
-    
-    
+
+
 async def deactivate_user_intouch(registration: str):
 
     print(f" Starting the enrollment process: {registration}")
@@ -137,7 +134,6 @@ async def deactivate_user_intouch(registration: str):
 
     print(f" Current status: '{current_status}'")
 
-   
     if current_status == 'activated':
         print(" Active user. Changing status to DEACTIVATED.")
 
@@ -164,7 +160,6 @@ async def deactivate_user_intouch(registration: str):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-  
     elif current_status in ['pending', 'created', 'invited']:
         print(" Pending/Created user. Executing definitive DELETION.")
 
@@ -183,16 +178,14 @@ async def deactivate_user_intouch(registration: str):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-   
     elif current_status in ['contact', 'deactivated']:
         print(f" Status '{current_status}' is protected or already processed. No action taken.")
         return {
-            "success": True,  
+            "success": True,
             "message": f"User {name} is set as '{current_status}' and does not need to be changed.",
             "acao": "nenhuma"
         }
 
-   
     else:
         return {
             "success": False,
