@@ -17,6 +17,8 @@ from .security import (
     verify_password,
 )
 from .settings import Settings
+from app.audit.cleanup.retention import RETENTION_POLICY
+from app.audit.cleanup.scheduler import start_scheduler
 
 __all__ = [
     "get_password_hash",
@@ -33,5 +35,7 @@ __all__ = [
     "Editor_user",
     "Form_data",
     "settings",
-    "Audit_log_list_filters"
+    "Audit_log_list_filters",
+    "RETENTION_POLICY",
+    "start_scheduler"
 ]

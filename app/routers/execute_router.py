@@ -9,15 +9,14 @@ async def execute(
     registration: str, 
     current_user: Current_user,
     background_tasks: BackgroundTasks,
-    
+
 ):
     resultado = await execute_offboarding(
     registration, 
     current_user, 
     background_tasks
-    )
-    
+    )    
     if not resultado["success"]:
         raise HTTPException(status_code=400, detail=resultado["error"])
-        
+   
     return resultado
