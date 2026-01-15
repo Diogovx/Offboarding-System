@@ -14,6 +14,9 @@ class AuditAction(str, Enum):
     SEARCH_AD_USER = "search_ad_user"
     DISABLE_AD_USER = "disable_ad_user"
 
+    SEARCH_INTOUCH_USER = "search_intouch_user"
+    DISABLE_INTOUCH_USER = "disable_intouch_user"
+
     VIEW_AUDIT_LOGS = "view_audit_logs"
     EXPORT_AUDIT_LOGS = "export_audit_logs"
 
