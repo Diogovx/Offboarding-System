@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.audit import audit_log_router
 from app.database import init_db
@@ -24,6 +25,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500"],  # quando colocar no Docker, temos que alterar
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/app", StaticFiles(directory="app"), name="app")
 
 app.include_router(system_router.router)
 app.include_router(auth_router.router)
