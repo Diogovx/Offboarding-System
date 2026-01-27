@@ -34,7 +34,7 @@ app.add_middleware(
 )
 
 app.mount("/app", StaticFiles(directory="app"), name="app")
-
+app.mount("/pages", StaticFiles(directory="pages"), name="pages")
 app.include_router(system_router.router)
 app.include_router(auth_router.router)
 app.include_router(user_router.router)
