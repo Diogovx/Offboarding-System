@@ -15,6 +15,7 @@ createApp({
         const searchStatusClass = ref('');
         const actionMessage = ref('');
         const actionClass = ref('');
+        const listServices = ref([]);
 
         onMounted(() => {
             const token = localStorage.getItem('access_token');
@@ -38,13 +39,15 @@ createApp({
             searchMessage.value = '';
             foundUser.value = null; 
             actionMessage.value = ''; 
+            listServices.value = []; 
 
-            try {
+            try {   
        
                 const response = await axios.get(`/intouch/${searchQuery.value}`);
-                
-                
+               
                 foundUser.value = response.data;
+                listServices.value = response.data.services || []
+               
                 
             } catch (error) {
                 console.error("error in search:", error);
@@ -66,10 +69,10 @@ createApp({
     if (!foundUser.value) return;
 
    
-    const registration = foundUser.value.registration || foundUser.value.username;
+    const registration = foundUser.value.registration;
 
-    const confirmacao = window.confirm(`Do you wish to deactivate the collaborator? ${foundUser.value.name || registration}?`);
-    if (!confirmacao) return;
+    const confirmation = window.confirm(`Do you wish to deactivate the collaborator? ${foundUser.value.name || registration}?`);
+    if (!confirmation) return;
 
     isProcessing.value = true;
     actionMessage.value = '';
@@ -79,6 +82,7 @@ createApp({
         const response = await axios.post(`/offboarding/execute/${registration}`);
 
         if (response.data.success) {
+
             actionMessage.value = `Success! Systems affected: ${response.data.details.join(", ")}`;
             actionClass.value = "bg-green-50 border-green-500 text-green-700";
         }
@@ -110,6 +114,7 @@ createApp({
             searchStatusClass,
             actionMessage,
             actionClass,
+            listServices,
             searchUser, 
             executeOffboarding, 
             logout 
