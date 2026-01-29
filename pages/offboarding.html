@@ -51,20 +51,42 @@
                 <p v-if="searchMessage" class="mt-2 text-sm" :class="searchStatusClass">{{ searchMessage }}</p>
             </div>
 
-            <div v-if="foundUser" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-                <div class="p-6 flex items-center justify-between">
-                    <div>
-                        <p class="text-xl font-bold text-gray-900">{{ foundUser.name || foundUser.username }}</p>
-                        <p class="text-sm text-gray-500">User: {{ foundUser.username }}</p>
-                    </div>
-                    <button @click="executeOffboarding" 
-                            :disabled="isProcessing"
-                            class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg font-bold hover:bg-red-600 hover:text-white transition-all cursor-pointer">
-                        {{ isProcessing ? 'Processando...' : 'Offboarding' }}
-                    </button>
-                </div>
+          <div v-if="foundUser" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden mt-6">
+    <div class="p-6">
+        
+        <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+            <div>
+                <p class="text-xl font-bold text-gray-900">{{ foundUser.name || foundUser.username }}</p>
+                <p class="text-sm text-gray-500">User: <span class="font-mono">{{ foundUser.username }}</span></p>
             </div>
+            <button @click="executeOffboarding" 
+                    :disabled="isProcessing"
+                    class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg font-bold hover:bg-red-600 hover:text-white transition-all cursor-pointer">
+                {{ isProcessing ? 'Processando...' : 'Offboarding' }}
+            </button>
+        </div>
 
+        <div class="mt-2">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sistemas Identificados</p>
+            <div class="flex flex-wrap gap-2">
+                <template v-if="listServices.length > 0">
+                    <span v-for="services in listServices" :key="service" 
+                          class="px-6 py-1 bg-cladtek/10 text-cladtek text-xs font-bold rounded-full border border-cladtek/20">
+                        {{ listServices }}
+                    </span>
+                </template>
+                
+                <span v-else class="text-sm text-gray-400 italic font-light">
+                    Nenhum serviço Identificado.
+                </span>
+            </div>
+        </div>
+
+    </div>
+</div>
+        </div>
+    </div>
+</div>
             <div v-if="actionMessage" class="mt-4 p-4 rounded-lg border-l-4" :class="actionClass">
                 {{ actionMessage }}
             </div>
