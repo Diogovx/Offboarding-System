@@ -10,7 +10,7 @@ HEADERS = {"Authorization": f"Basic {settings.INTOUCH_TOKEN}"}
 
 
 def search_user(registration: str):
-
+    services_list_view = []
     print(f" Searching for the user with the registration number: {registration}")
 
     if not settings.INTOUCH_TOKEN:
@@ -48,6 +48,8 @@ def search_user(registration: str):
         first_name = raw_user.get('firstName', '')
         surname = raw_user.get('lastName', '')
         full_name = f"{first_name} {surname}".strip()
+        
+        services_list_view.append("Intouch")
 
         return {
             "success": True,
@@ -57,7 +59,8 @@ def search_user(registration: str):
             "email": raw_user.get('profile', {}).get('workemail'),
             "role": raw_user.get('position'),
             "current_status": raw_user.get('status'),
-            "registration": registration
+            "registration": registration,
+            "services": services_list_view
         }
 
     except Exception as e:
