@@ -21,3 +21,9 @@ exports
 
 # Node files
 node_modules/
+
+# Maintaining the GitHub language bar's accuracy.
+
+pnpm-lock.yaml linguist-generated
+node_modules/* linguist-vendored
+dist/* linguist-vendored
