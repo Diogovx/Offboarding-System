@@ -46,8 +46,10 @@ def search_user(registration: str):
         full_name = f"{first_name} {surname}".strip()
         
     
-        
-        services_list_view.append("Intouch")
+        status_intouch = raw_user.get('status')
+
+        if status_intouch != 'deactivated':
+            services_list_view.append("Intouch")
 
         if registration and registration.isdigit():
             services_list_view.append("Gate")
@@ -59,7 +61,7 @@ def search_user(registration: str):
             "name": full_name,
             "email": raw_user.get('profile', {}).get('workemail'),
             "role": raw_user.get('position'),
-            "current_status": raw_user.get('status'),
+            "current_status": status_intouch,
             "registration": registration,
             "services": services_list_view 
         }
