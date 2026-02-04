@@ -15,8 +15,8 @@ async def deactivate_user_turnstiles(registration: str):
     payload = {
         "object": "users",
         "values": {
-            "begin_time": 0,
-            "end_time": 1717690651 #
+
+            "end_time": 1700000000
         },
         "where": {
             "users": { "id": user_id }
