@@ -53,7 +53,7 @@ createApp({
         }
 
     } catch (error) {
-        console.error("Erro na busca:", error);
+        console.error("Search error:", error);
         searchMessage.value = "Connection error.";
         searchStatusClass.value = "text-red-500 font-medium";
     } finally {
