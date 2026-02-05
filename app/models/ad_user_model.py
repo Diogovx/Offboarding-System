@@ -2,11 +2,11 @@ from pydantic import BaseModel
 
 
 class ADUser(BaseModel):
-    Name: str
-    SamAccountName: str
-    Enabled: bool
-    DistinguishedName: str
-    Description: str | None
+    name: str
+    sam_account_name: str
+    enabled: bool
+    distinguished_name: str
+    description: str | None
 
 
 class DisableUserRequest(BaseModel):
