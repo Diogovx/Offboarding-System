@@ -5,6 +5,7 @@ from ..audit.audit_log_service import (
     safe_export_path,
 )
 from ..audit.exporters import CSVExporter, JSONLExporter
+from .ad_service import search_aduser, ldap_entry_to_ad_user, disable_aduser
 
 __all__ = [
     "create_audit_log",
@@ -12,5 +13,8 @@ __all__ = [
     "CSVExporter",
     "fetch_audit_logs",
     "export_audit_logs_task",
-    "safe_export_path"
+    "safe_export_path",
+    "search_aduser",
+    "ldap_entry_to_ad_user",
+    "disable_aduser"
 ]
