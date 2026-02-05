@@ -8,7 +8,7 @@ TURNSTILES = [
 ]
 
 async def deactivate_user_turnstiles(registration: str):
-    print(f"DEBUG: Recebi a matricula: {registration}")
+    print(f"DEBUG: Receiving the registration: {registration}")
     
     user_id = int(registration)
     
