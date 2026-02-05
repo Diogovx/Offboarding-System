@@ -17,6 +17,8 @@ class AuditAction(str, Enum):
     SEARCH_INTOUCH_USER = "search_intouch_user"
     DISABLE_INTOUCH_USER = "disable_intouch_user"
 
+    DISABLE_TURNSTILE_USER = "disable_turnstile_user"
+
     VIEW_AUDIT_LOGS = "view_audit_logs"
     EXPORT_AUDIT_LOGS = "export_audit_logs"
 
