@@ -48,10 +48,8 @@ def search_user(registration: str):
     
         status_intouch = raw_user.get('status')
 
-        if status_intouch != 'deactivated':
+        if status_intouch == 'activated':
             services_list_view.append("Intouch")
-
-        if registration and registration.isdigit():
             services_list_view.append("Gate")
 
         return {
