@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
     SECRET_KEY: str = ""
     ALGORITHM: str = ""
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = ""
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     INTOUCH_TOKEN: str = ""
     INTOUCH_URL: str = ""
     INTOUCH_API_KEY: str = "your_api_key_here"
@@ -19,4 +19,10 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str = ""
     EMAIL_RECEIVER: str = ""
     SMTP_SERVER: str = ""
-    PORT: int = ""
+    PORT: int = 587
+    AD_USERNAME: str = "username_here"
+    AD_PASSWORD: str = "password_here"
+    AD_SERVER: str = ""
+    AD_DOMAIN: str = ""
+    AD_BASE_DN: str = ""
+    DISABLED_OU: str = ""
