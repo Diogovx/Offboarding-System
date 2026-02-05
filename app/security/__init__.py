@@ -12,7 +12,7 @@ from .deps import (
     get_current_user,
     require_admin,
     require_editor,
-    settings,
+    settings
 )
 from .security import (
     create_access_token,
@@ -20,6 +20,7 @@ from .security import (
     verify_password,
 )
 from .settings import Settings
+from .connections import get_ldap_connection
 
 __all__ = [
     "get_password_hash",
@@ -38,5 +39,6 @@ __all__ = [
     "settings",
     "Audit_log_list_filters",
     "RETENTION_POLICY",
-    "start_scheduler"
+    "start_scheduler",
+    "get_ldap_connection"
 ]
