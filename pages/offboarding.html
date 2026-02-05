@@ -49,8 +49,12 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
                         <div>
-                            <p class="text-xl font-bold text-gray-900">Name: {{ foundUser.name }}</p>
+                            <p class="text-2xl font-bold text-gray-900">Name: {{ foundUser.name }}</p>
                             <p class="text-xl text-gray-500 font-mono">Registration: {{ foundUser.registration }}</p>
+                            <p class="text-xl text-gray-500 font-mono">Department: {{ foundUser.role}} </p>
+                            <p class="text-xl text-gray-500 font-mono">Status: {{foundUser.current_status}}</p>
+                            <p class="text-xl text-gray-500 font-mono">Email: {{foundUser.email}}</p>
+
                         </div>
                         <button @click="showConfirmModal = true" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg font-bold hover:bg-red-600 hover:text-white transition-all cursor-pointer">
                             Offboarding
@@ -65,7 +69,7 @@
                                     {{ service }}
                                 </span>
                             </template>
-                            <span v-else class="text-sm text-gray-400 italic font-light">No systems identified.</span>
+                            <span v-else class="text-sm text-gray-400 italic font-light">No systems identified. </span>
                         </div>
                     </div>
                 </div>
