@@ -6,19 +6,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy.orm import Session
 
+from app.security.settings import settings
 from app.database import get_db
 from app.models import User
-from app.security.settings import Settings
+from app.services.ad import ADService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-@lru_cache
-def get_settings():
-    return Settings()
-
-
-settings = get_settings()
 
 
 def get_current_user(
@@ -73,9 +66,14 @@ def require_editor(user: User = Depends(get_current_user)):
     return user
 
 
+def get_ad_service() -> ADService:
+    return ADService()
+
+
 Db_session = Annotated[Session, Depends(get_db)]
 Current_user = Annotated[User, Depends(get_current_user)]
 Admin_user = Annotated[User, Depends(require_admin)]
 Token = Annotated[str, Depends(oauth2_scheme)]
 Editor_user = Annotated[User, Depends(require_editor)]
 Form_data = Annotated[OAuth2PasswordRequestForm, Depends()]
+ADServiceDep = Annotated[ADService, Depends(get_ad_service)]
