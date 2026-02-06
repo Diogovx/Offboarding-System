@@ -1,170 +1,163 @@
-import json
-from subprocess import PIPE, STDOUT, run
-
 from fastapi import APIRouter, HTTPException, Request, status
-
 from app.audit.audit_log_service import create_audit_log
 from app.enums import AuditAction, AuditStatus
+from logging import getLogger
 from app.models import ADUser, DisableUserRequest
 from app.schemas import AuditLogCreate
-from app.security import Current_user, Db_session
+from app.security import Current_user, Db_session, ADServiceDep
+
+logger = getLogger(__name__)
 
 router = APIRouter(prefix="/aduser", tags=["ADUser"])
 
 
 @router.get("/", response_model=list[ADUser])
 async def get_user(
-    session: Current_user,
+    ad_service: ADServiceDep,
+    current_user: Current_user,
     request: Request,
     db: Db_session,
     registration: str | None = None,
 ):
-    if not registration:
-        filter_str = "*"
-    else:
-        safe_registration = registration.replace('"', '"')
-        filter_str = f"Description -like '*{safe_registration}*'"
-
-    command_args = [
-        "powershell.exe",
-        "-NonInteractive",
-        "-Command",
-        f'''Get-AdUser -Filter "{filter_str}" -Properties SamAccountName,Name,Enabled,Description,DistinguishedName | ConvertTo-Json -Compress''',
-    ]
-
-    command_output = run(command_args, check=False, stdout=PIPE, stderr=STDOUT)
-
-    output_string = command_output.stdout.decode(
-        "utf-8", errors="ignore"
-    ).strip()
-
     try:
-        json_data = json.loads(output_string)
-
-        if isinstance(json_data, dict):
-            users_list = [json_data]
-        elif isinstance(json_data, list):
-            users_list = json_data
-        else:
-            users_list = []
+        logger.info(
+            f"User {current_user.username}"
+            " searching AD - registration={registration}"
+        )
+        users = ad_service.search_users(registration=registration)
 
         create_audit_log(
             db,
             AuditLogCreate(
                 action=AuditAction.SEARCH_AD_USER,
                 status=AuditStatus.SUCCESS,
-                message="User research conducted",
-                user_id=session.id,
-                username=session.username,
+                message=f"User research conducted - {len(users)} founded",
+                user_id=current_user.id,
+                username=current_user.username,
                 resource=registration or "*",
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
             ),
         )
 
-        return [ADUser.model_validate(user) for user in users_list]
-    except json.JSONDecodeError:
+        logger.info(
+            f"Found {len(users)} users for registration={registration}"
+        )
+
+        return users
+
+    except HTTPException as e:
+        logger.warning(f"HTTP error searching AD: {e.detail}")
+
         create_audit_log(
             db,
             AuditLogCreate(
                 action=AuditAction.SEARCH_AD_USER,
                 status=AuditStatus.FAILED,
-                message=f"Invalid JSON returned by AD: {output_string}",
-                user_id=session.id,
-                username=session.username,
+                message=f"Search Failed: {e.detail}",
+                user_id=current_user.id,
+                username=current_user.username,
                 resource=registration or "*",
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
             ),
         )
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error searching AD: {e}", exc_info=True)
+
+        create_audit_log(
+            db,
+            AuditLogCreate(
+                action=AuditAction.SEARCH_AD_USER,
+                status=AuditStatus.FAILED,
+                message=f"Unexpected error: {str(e)}",
+                user_id=current_user.id,
+                username=current_user.username,
+                resource=registration or "*",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error querying Active Directory.",
+            detail="Error querying Active Directory"
         )
 
 
 @router.post("/disable")
 async def disable_user(
     payload: DisableUserRequest,
-    session: Current_user,
+    ad_service: ADServiceDep,
+    current_user: Current_user,
     request: Request,
     db: Db_session
 ):
-    filter_str = f"Description -like '*{payload.registration}*'"
-
-    ps_lookup = f"""
-        $user = Get-ADUser -Filter "{filter_str}" -Properties SamAccountName,Name,Enabled,Description,DistinguishedName
-        if (!$user) {{
-            Write-Error "Usuário não encontrado pela matrícula."
-            exit 1
-        }}
-        $user | ConvertTo-Json -Compress
-    """
-
-    lookup_cmd = ["powershell.exe", "-NonInteractive", "-Command", ps_lookup]
-
-    lookup_result = run(lookup_cmd, check=False, stdout=PIPE, stderr=STDOUT)
-    lookup_output = lookup_result.stdout.decode(
-        "utf-8", errors="ignore"
-    ).strip()
-
     try:
-        user_data = json.loads(lookup_output)
-    except Exception:
-        raise HTTPException(
-            status_code=500, detail=f"Erro retornado pelo AD: {lookup_output}"
+        logger.info(
+            f"User {current_user.username} initiating AD user disable - "
+            f"registration={payload.registration}, "
+            "performed_by={payload.performed_by}"
         )
+        user = ad_service.disable_user(payload)
 
-    sam = user_data["SamAccountName"]
-    old_description = user_data.get("Description", "")
-
-    new_description = f"""{old_description} | Desativado por {payload.performed_by} (Sistema Dismissal Assistant)"""
-
-    ps_action = f"""
-    $ErrorActionPreference = "Stop"
-
-    $identity = "{sam}"
-
-    Disable-ADAccount -Identity $identity
-    Set-ADUser -Identity $identity -Description "{new_description}"
-
-    $dn = (Get-ADUser -Identity $identity).DistinguishedName
-    Move-ADObject -Identity $dn -TargetPath "OU=CONTAS DESATIVADAS,OU=Usuários,OU=CLADTEK DO BRASIL - Office RJ,DC=cladtekbr,DC=local"
-
-
-    Write-Output '{{"status":"success","user":"{payload.registration}"}}'
-    """
-
-    action_cmd = ["powershell.exe", "-NonInteractive", "-Command", ps_action]
-
-    result = run(action_cmd, check=False, stdout=PIPE, stderr=STDOUT)
-    output = result.stdout.decode("utf-8", errors="ignore").strip()
-
-    try:
         create_audit_log(
             db,
             AuditLogCreate(
                 action=AuditAction.DISABLE_AD_USER,
                 status=AuditStatus.SUCCESS,
-                message="User deactivated and moved successfully.",
-                user_id=session.id,
-                username=session.username,
+                message=(
+                    f"User '{user.sam_account_name}' ({user.name}) "
+                    f"deactivated successfully by {payload.performed_by}"
+                ),
+                user_id=current_user.id,
+                username=current_user.username,
                 resource=payload.registration,
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
             ),
         )
 
-        return json.loads(output)
-    except Exception:
+        logger.info(f"User {user.sam_account_name} successfully disabled")
+
+        return user
+
+    except HTTPException as e:
+        logger.warning(
+            f"HTTP error disabling user {payload.registration}: "
+            f"{e.status_code} - {e.detail}"
+        )
+
         create_audit_log(
             db,
             AuditLogCreate(
                 action=AuditAction.DISABLE_AD_USER,
                 status=AuditStatus.FAILED,
-                message=f"Failed to deactivate user: {output}",
-                user_id=session.id,
-                username=session.username,
+                message=f"Failed to disable user: {e.detail}",
+                user_id=current_user.id,
+                username=current_user.username,
+                resource=payload.registration,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
+        raise
+
+    except Exception as e:
+        logger.error(
+            f"Unexpected error disabling user {payload.registration}: {e}",
+            exc_info=True
+        )
+
+        create_audit_log(
+            db,
+            AuditLogCreate(
+                action=AuditAction.DISABLE_AD_USER,
+                status=AuditStatus.FAILED,
+                message=f"Failed to disable user: {type(e).__name__}",
+                user_id=current_user.id,
+                username=current_user.username,
                 resource=payload.registration,
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
@@ -172,5 +165,5 @@ async def disable_user(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while disabling/moving the user: {output}",
+            detail="Error disabling user in Active Directory"
         )

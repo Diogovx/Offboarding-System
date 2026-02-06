@@ -12,5 +12,5 @@ __all__ = [
     "CSVExporter",
     "fetch_audit_logs",
     "export_audit_logs_task",
-    "safe_export_path"
+    "safe_export_path",
 ]

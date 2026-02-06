@@ -12,7 +12,8 @@ from .deps import (
     get_current_user,
     require_admin,
     require_editor,
-    settings,
+    ADServiceDep,
+    settings
 )
 from .security import (
     create_access_token,
@@ -38,5 +39,7 @@ __all__ = [
     "settings",
     "Audit_log_list_filters",
     "RETENTION_POLICY",
-    "start_scheduler"
+    "start_scheduler",
+    "get_ldap_connection",
+    "ADServiceDep"
 ]
