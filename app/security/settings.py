@@ -34,3 +34,9 @@ def get_settings():
 
 
 settings = get_settings()
+    PORT: int = ""
+    TURNSTILE_A_URL: str = ""
+    TURNSTILE_A_SESSION: str = ""
+    TURNSTILE_B_URL: str = ""
+    TURNSTILE_B_SESSION: str = ""
+

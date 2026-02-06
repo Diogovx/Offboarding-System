@@ -18,3 +18,7 @@ wheels/
 
 # Exported files
 exports
+
+# Node files
+node_modules/
+
