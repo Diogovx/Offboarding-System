@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from functools import lru_cache
 
 class Settings(BaseSettings):
 
@@ -26,3 +26,11 @@ class Settings(BaseSettings):
     AD_DOMAIN: str = ""
     AD_BASE_DN: str = ""
     DISABLED_OU: str = ""
+
+
+@lru_cache
+def get_settings():
+    return Settings()
+
+
+settings = get_settings()
