@@ -100,7 +100,7 @@ def is_account_enabled(uac: int) -> bool:
     Returns:
     True if the account is enabled
     """
-    return not bool(uac | UserAccountControl.ACCOUNTDISABLE)
+    return not bool(uac & UserAccountControl.ACCOUNTDISABLE)
 
 
 def build_disabled_description(

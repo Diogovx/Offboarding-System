@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     AD_DOMAIN: str = ""
     AD_BASE_DN: str = ""
     DISABLED_OU: str = ""
+    TURNSTILE_A_URL: str = ""
+    TURNSTILE_A_SESSION: str = ""
+    TURNSTILE_B_URL: str = ""
+    TURNSTILE_B_SESSION: str = ""
 
 
 @lru_cache
@@ -34,9 +38,3 @@ def get_settings():
 
 
 settings = get_settings()
-    PORT: int = ""
-    TURNSTILE_A_URL: str = ""
-    TURNSTILE_A_SESSION: str = ""
-    TURNSTILE_B_URL: str = ""
-    TURNSTILE_B_SESSION: str = ""
-
