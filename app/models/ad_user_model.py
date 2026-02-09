@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ADUser(BaseModel):
@@ -7,6 +7,7 @@ class ADUser(BaseModel):
     enabled: bool
     distinguished_name: str
     description: str | None
+    user_account_control: int = Field(..., description="UAC from AD")
 
 
 class DisableUserRequest(BaseModel):
