@@ -33,7 +33,7 @@
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <form class="space-y-6" @submit.prevent="signup">
                 <div>
-                    <label for="username" class="block text-sm/6 font-medium text-gray-700">Username</label>
+                    <label for="username" class="block text-sm/6 font-medium text-gray-700">Usuário</label>
                     <div class="mt-2">
                         <input v-model="username" type="text" id="username" required 
                                class="block w-full rounded-md border-2 border-cladtek bg-white px-3 py-1.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-cladtek/40 sm:text-sm/6 transition-all" />
@@ -42,9 +42,9 @@
 
                 <div>
                     <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm/6 font-medium text-gray-700">Password</label>
+                        <label for="password" class="block text-sm/6 font-medium text-gray-700">Senha</label>
                         <div class="text-sm">
-                            <a href="#" class="font-semibold text-cladtek hover:text-cladtek-dark">Forgot password?</a>
+                            <a href="#" class="font-semibold text-cladtek hover:text-cladtek-dark">Esqueceu a senha?</a>
                         </div>
                     </div>
                     <div class="mt-2">
@@ -56,14 +56,14 @@
                 <div>
                     <button type="submit" 
                             class="flex w-full justify-center rounded-md bg-cladtek px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-cladtek-dark transition-all cursor-pointer">
-                        Sign in
+                        Entrar
                     </button>
                 </div>
             </form>
 
             <p class="mt-10 text-center text-sm/6 text-gray-500">
-                You don't have access?
-                <a href="#" class="font-semibold text-cladtek hover:underline">Talk with IT team!</a>
+                Não possui acesso?
+                <a href="#" class="font-semibold text-cladtek hover:underline">Acione o time de TI!</a>
             </p>
         </div>
     </div>

@@ -25,7 +25,7 @@
         <nav class="bg-cladtek p-4 text-white shadow-lg flex justify-between items-center">
             <span class="font-bold text-lg tracking-wide">Cladtek | Offboarding</span>
             <div class="flex items-center gap-4 text-sm">
-                <span>Hello, <strong>{{ currentUser }}</strong></span>
+                <span>Olá, <strong>{{ currentUser }}</strong></span>
                 <button @click="logout" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors cursor-pointer">Logout</button>
             </div>
         </nav>
@@ -34,12 +34,12 @@
             <h1 class="text-2xl font-bold text-gray-800 mb-6">Offboarding</h1>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Search for Collaborator</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Busque por um colaborador</label>
                 <div class="flex gap-2">
-                    <input v-model="searchQuery" @keyup.enter="searchUser" type="text" placeholder="Enter registration number" 
+                    <input v-model="searchQuery" @keyup.enter="searchUser" type="text" placeholder="Matrícula" 
                            class="block w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-cladtek transition-all">
                     <button @click="searchUser" :disabled="isLoading" class="bg-cladtek hover:bg-cladtek-dark text-white px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50 min-w-[100px]">
-                        {{ isLoading ? '...' : 'Search' }}
+                        {{ isLoading ? '...' : 'Buscar' }}
                     </button>
                 </div>
                 <p v-if="searchMessage" class="mt-2 text-sm" :class="searchStatusClass">{{ searchMessage }}</p>
@@ -49,9 +49,10 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
                         <div>
-                            <p class="text-2xl font-bold text-gray-900">Name: {{ foundUser.name }}</p>
-                            <p class="text-xl text-gray-500 font-mono">Registration: {{ foundUser.registration }}</p>
-                            <p class="text-xl text-gray-500 font-mono">Department: {{ foundUser.role}} </p>
+                            <p class="text-2xl font-bold text-gray-900">Nome {{ foundUser.name }}</p>
+                           <br>
+                            <p class="text-xl text-gray-500 font-mono">Matrícula: {{ foundUser.registration }}</p>
+                            <p class="text-xl text-gray-500 font-mono">Departamento: {{ foundUser.role}} </p>
                             <p class="text-xl text-gray-500 font-mono">Status: {{foundUser.current_status}}</p>
                             <p class="text-xl text-gray-500 font-mono">Email: {{foundUser.email}}</p>
 
@@ -62,14 +63,14 @@
                     </div>
 
                     <div class="mt-2">
-                        <p class="text-[13px] font-bold text-gray-400 uppercase tracking-widest mb-3">Identified Systems</p>
+                        <p class="text-[13px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sistemas identificados</p>
                         <div class="flex flex-wrap gap-2">
                             <template v-if="listServices && listServices.length > 0">
                                 <span v-for="service in listServices" :key="service" class="px-6 py-1 bg-cladtek/10 text-cladtek text-1x1 font-bold rounded-full border border-cladtek/20">
                                     {{ service }}
                                 </span>
                             </template>
-                            <span v-else class="text-sm text-gray-400 italic font-light">No systems identified. </span>
+                            <span v-else class="text-sm text-gray-400 italic font-light">Nenhum sistema identificado </span>
                         </div>
                     </div>
                 </div>
@@ -98,9 +99,9 @@
                                     <h3 class="text-lg font-bold text-cladtek" id="modal-title">Deactivate Collaborator</h3>
                                     <div class="mt-2">
                                         <p class="text-sm text-gray-500">
-                                            Are you sure you want to deactivate <strong>{{ foundUser?.name }} ( {{foundUser?.registration}} )</strong>? 
-                                            This will remove access to: <span class="text-cladtek-dark font-semibold">{{ listServices.join(', ') }}</span>. 
-                                            This action cannot be undone.
+                                            Tem certeza que deseja desativar o usuário <strong>{{ foundUser?.name }} ({{foundUser?.registration}})</strong>? 
+                                            Acesso a serem desativados: <span class="text-cladtek-dark font-semibold">{{ listServices.join(', ') }}</span>. 
+                                            Essa ação não poderá ser desfeita.
                                         </p>
                                     </div>
                                 </div>
