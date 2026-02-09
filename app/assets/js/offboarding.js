@@ -16,7 +16,8 @@ createApp({
         const actionMessage = ref('');
         const actionClass = ref('');
         const listServices = ref([]);
-
+   
+        
         onMounted(() => {
             const token = localStorage.getItem('access_token');
             
@@ -53,7 +54,7 @@ createApp({
         }
 
     } catch (error) {
-        console.error("Erro na busca:", error);
+        console.error("Search error:", error);
         searchMessage.value = "Connection error.";
         searchStatusClass.value = "text-red-500 font-medium";
     } finally {
