@@ -77,8 +77,8 @@ async def execute_offboarding(registration, current_user, ad_service, background
 
     try:
         payload_ad = DisableUserRequest(registration=registration, performed_by=current_user.username)
-        res_ad = ad_service.disable_user(payload_ad)
 
+        res_ad = ad_service.disable_user(payload_ad)
         services_list.append("Active Directory")
             
         create_audit_log(db, AuditLogCreate(
