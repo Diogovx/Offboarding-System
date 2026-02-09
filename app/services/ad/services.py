@@ -122,6 +122,10 @@ class ADService:
         user = self.get_unique_user(registration)
         logger.info(f"User found: {user.sam_account_name} ({user.name})")
 
+        logger.debug(
+        f"User UAC: {user.user_account_control}, Enabled: {user.enabled}"
+    )
+
         if not user.enabled:
             logger.warning(
                 f"The user is already disabled: {user.sam_account_name}"
@@ -129,7 +133,7 @@ class ADService:
             return user
 
         dn = user.distinguished_name
-        current_uac = self._get_uac_from_enabled(user.enabled)
+        current_uac = user.user_account_control
 
         try:
             new_description = build_disabled_description(
@@ -150,6 +154,7 @@ class ADService:
 
             user.enabled = False
             user.description = new_description
+            user.user_account_control = current_uac | UserAccountControl.ACCOUNTDISABLE
 
             return user
 
@@ -180,23 +185,6 @@ class ADService:
             enabled=is_account_enabled(uac),
             distinguished_name=entry.distinguishedName.value,
             description=entry.description.value
-            if 'description' in entry else None
+            if 'description' in entry else None,
+            user_account_control=uac
         )
-
-    @staticmethod
-    def _get_uac_from_enabled(enabled: bool) -> int:
-        """
-        Rebuilds basic UAC from enabled status
-
-        Args:
-        enabled: Whether the account is enabled
-
-        Returns:
-        UserAccountControl value
-        """
-        base_uac = UserAccountControl.NORMAL_ACCOUNT
-
-        if not enabled:
-            base_uac |= UserAccountControl.ACCOUNTDISABLE
-
-        return base_uac
