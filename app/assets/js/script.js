@@ -3,11 +3,10 @@ const { createApp, ref } = Vue;
 createApp({
     setup() {
  
-        const title_page = ref('access your account');
+        //const title_page = ref('access your account');
         const username = ref(''); 
         const password = ref('');
 
-        
         const signup = async () => {
             console.log("Trying to log in with:", username.value);
 
@@ -42,7 +41,6 @@ try {
 
     
         return {
-            title_page,
             username,
             password,
             signup
