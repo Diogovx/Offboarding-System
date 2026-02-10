@@ -8,7 +8,7 @@ from app.services import intouch_service, email_service, turnstiles_service
 from app.enums import EmailActions
 
 
-async def execute_offboarding(registration, current_user, background_tasks, req: Request, db):
+async def execute_offboarding(registration, current_user, ad_service, background_tasks, req: Request, db):
     services_list = []
     
     
@@ -77,15 +77,14 @@ async def execute_offboarding(registration, current_user, background_tasks, req:
 
     try:
         payload_ad = DisableUserRequest(registration=registration, performed_by=current_user.username)
-        res_ad = await disable_user(payload=payload_ad, session=current_user, request=req, db=db)
 
-        if res_ad.get("success"):
-            services_list.append("Active Directory")
+        res_ad = ad_service.disable_user(payload_ad)
+        services_list.append("Active Directory")
             
         create_audit_log(db, AuditLogCreate(
             action=AuditAction.DISABLE_AD_USER,
             status=AuditStatus.SUCCESS,
-            message="User successfully deactivated from AD.",
+            message=f"User successfully deactivated from AD.",
             user_id=current_user.id,
             username=current_user.username,
             resource=registration,
