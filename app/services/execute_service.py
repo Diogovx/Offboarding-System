@@ -1,22 +1,20 @@
 from fastapi import Request
+
 from app.audit.audit_log_service import create_audit_log
-from app.enums import AuditAction, AuditStatus
-from app.routers.aduser_router import disable_user
-from app.schemas import AuditLogCreate
+from app.enums import AuditAction, AuditStatus, EmailActions
 from app.models.ad_user_model import DisableUserRequest
-from app.services import intouch_service, email_service, turnstiles_service
-from app.enums import EmailActions
+from app.schemas import AuditLogCreate
+from app.services import email_service, intouch_service, turnstiles_service
 
 
 async def execute_offboarding(registration, current_user, ad_service, background_tasks, req: Request, db):
     services_list = []
-    
-    
+
     try:
         res_turnstiles = await turnstiles_service.deactivate_user_turnstiles(registration=registration)
         if res_turnstiles.get("success"):
             services_list.append("Gate")
-            
+
             create_audit_log(
                 db,
                 AuditLogCreate(
@@ -45,12 +43,11 @@ async def execute_offboarding(registration, current_user, ad_service, background
             ),
         )
 
-  
     try:
         res_intouch = await intouch_service.deactivate_user_intouch(registration)
         if res_intouch.get("success"):
             services_list.append("Intouch")
-            
+
             create_audit_log(db, AuditLogCreate(
                 action=AuditAction.DISABLE_INTOUCH_USER,
                 status=AuditStatus.SUCCESS,
@@ -62,7 +59,7 @@ async def execute_offboarding(registration, current_user, ad_service, background
                 user_agent=req.headers.get("user-agent"),
             ))
     except Exception as e:
-       
+
         create_audit_log(db, AuditLogCreate(
             action=AuditAction.DISABLE_INTOUCH_USER,
             status=AuditStatus.FAILED,
@@ -74,17 +71,16 @@ async def execute_offboarding(registration, current_user, ad_service, background
             user_agent=req.headers.get("user-agent"),
         ))
 
-
     try:
         payload_ad = DisableUserRequest(registration=registration, performed_by=current_user.username)
 
         res_ad = ad_service.disable_user(payload_ad)
         services_list.append("Active Directory")
-            
+
         create_audit_log(db, AuditLogCreate(
             action=AuditAction.DISABLE_AD_USER,
             status=AuditStatus.SUCCESS,
-            message=f"User successfully deactivated from AD.",
+            message="User successfully deactivated from AD.",
             user_id=current_user.id,
             username=current_user.username,
             resource=registration,
@@ -113,4 +109,3 @@ async def execute_offboarding(registration, current_user, ad_service, background
     )
 
     return {"success": True, "details": services_list}
-

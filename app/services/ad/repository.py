@@ -1,17 +1,20 @@
-from contextlib import contextmanager
-from typing import Generator
 import logging
+from contextlib import contextmanager
+from typing import Any, Generator
 
-from ldap3 import Connection, SUBTREE, MODIFY_REPLACE
+from ldap3 import MODIFY_REPLACE, SUBTREE, Connection
 from ldap3.core.exceptions import LDAPException
-from typing import Any
-from .connections import get_ldap_connection
+
 from app.security.security import settings
 from app.services.ad.constants import (
-    LDAP_ATTRS, MAX_SEARCH_RESULTS, UserAccountControl
+    LDAP_ATTRS,
+    MAX_SEARCH_RESULTS,
+    UserAccountControl,
 )
 from app.services.ad.exceptions import ADConnectionError, ADOperationError
 from app.services.ad.utils import escape_ldap_filter
+
+from .connections import get_ldap_connection
 
 logger = logging.getLogger(__name__)
 

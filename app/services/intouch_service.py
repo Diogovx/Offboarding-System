@@ -1,10 +1,13 @@
 from http import HTTPStatus
+
 import requests
+
 from app.security import Settings
 
 settings = Settings()
 
 HEADERS = {"Authorization": f"Basic {settings.INTOUCH_TOKEN}"}
+
 
 def search_user(registration: str):
     services_list_view = []
@@ -44,15 +47,13 @@ def search_user(registration: str):
         first_name = raw_user.get('firstName', '')
         surname = raw_user.get('lastName', '')
         full_name = f"{first_name} {surname}".strip()
-        
-    
+
         status_intouch = raw_user.get('status')
 
         if status_intouch == 'activated':
             services_list_view.append("Intouch")
             services_list_view.append("Gate")
             services_list_view.append("AD")
-            
 
         return {
             "success": True,
@@ -63,11 +64,12 @@ def search_user(registration: str):
             "role": raw_user.get('position'),
             "current_status": status_intouch,
             "registration": registration,
-            "services": services_list_view 
+            "services": services_list_view
         }
 
     except Exception as e:
         return {"erro": str(e), "success": False}
+
 
 async def activate_user_intouch(registration: str):
 

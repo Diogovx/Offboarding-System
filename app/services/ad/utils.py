@@ -1,5 +1,5 @@
 import re
-from typing import Any
+
 from app.services.ad.constants import UserAccountControl
 from app.services.ad.exceptions import InvalidInputError
 

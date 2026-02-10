@@ -44,7 +44,8 @@ def list_users(
         AuditLogCreate(
             action=AuditAction.LIST_USERS,
             status=AuditStatus.SUCCESS,
-            message=f"Listed users offset={filter_users.offset} limit={filter_users.limit}",
+            message=f"""Listed users offset={filter_users.offset}
+            limit={filter_users.limit}""",
             user_id=current_user.id,
             username=current_user.username,
             resource="/users",

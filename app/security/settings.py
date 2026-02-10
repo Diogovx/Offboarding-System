@@ -1,5 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
 
@@ -35,5 +37,6 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings():
     return Settings()
+
 
 settings = get_settings()

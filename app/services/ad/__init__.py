@@ -1,12 +1,13 @@
-from .services import ADService
+from .connections import get_ldap_connection
 from .exceptions import (
     ADConnectionError,
-    ADServiceError,
     ADOperationError,
+    ADServiceError,
     InvalidInputError,
-    MultipleUsersFoundError
-    )
-from .connections import get_ldap_connection
+    MultipleUsersFoundError,
+)
+from .services import ADService
+
 __all__ = [
     "ADService",
     "ADConnectionError",

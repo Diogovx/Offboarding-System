@@ -1,4 +1,5 @@
-from ldap3 import Connection, ALL, Server, SIMPLE  # type: ignore
+from ldap3 import ALL, SIMPLE, Connection, Server  # type: ignore
+
 from app.security.security import settings
 
 

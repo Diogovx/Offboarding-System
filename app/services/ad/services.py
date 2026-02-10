@@ -1,19 +1,19 @@
-from typing import Sequence
 import logging
+from typing import Sequence
 
 from app.models import ADUser, DisableUserRequest
-from app.services.ad.repository import ADRepository
-from app.services.ad.exceptions import (
-    UserNotFoundError,
-    MultipleUsersFoundError,
-)
-from app.services.ad.utils import (
-    validate_registration,
-    validate_performed_by,
-    is_account_enabled,
-    build_disabled_description,
-)
 from app.services.ad.constants import UserAccountControl
+from app.services.ad.exceptions import (
+    MultipleUsersFoundError,
+    UserNotFoundError,
+)
+from app.services.ad.repository import ADRepository
+from app.services.ad.utils import (
+    build_disabled_description,
+    is_account_enabled,
+    validate_performed_by,
+    validate_registration,
+)
 
 logger = logging.getLogger(__name__)
 

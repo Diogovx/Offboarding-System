@@ -1,5 +1,6 @@
+
 import requests
-from http import HTTPStatus
+
 from app.security import settings
 
 TURNSTILES = [
@@ -7,11 +8,12 @@ TURNSTILES = [
     {"name": "Unit B", "url": settings.TURNSTILE_B_URL, "session": settings.TURNSTILE_B_SESSION}
 ]
 
+
 async def deactivate_user_turnstiles(registration: str):
     print(f"DEBUG: Receiving the registration: {registration}")
-    
+
     user_id = int(registration)
-    
+
     payload = {
         "object": "users",
         "values": {
@@ -19,7 +21,7 @@ async def deactivate_user_turnstiles(registration: str):
             "end_time": 1700000000
         },
         "where": {
-            "users": { "id": user_id }
+            "users": {"id": user_id}
         }
     }
 
@@ -28,7 +30,7 @@ async def deactivate_user_turnstiles(registration: str):
         try:
             requests.post(url, json=payload, timeout=5)
         except Exception:
-            continue 
+            continue
 
     return {
         "success": True,
