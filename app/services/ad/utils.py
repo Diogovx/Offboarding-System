@@ -1,5 +1,5 @@
 import re
-
+from datetime import datetime
 from app.services.ad.constants import UserAccountControl
 from app.services.ad.exceptions import InvalidInputError
 
@@ -127,8 +127,9 @@ def build_disabled_description(
 
     InvalidInputError: If the description exceeds the limit
     """
+    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     base = old_description or ""
-    suffix = f" | Desativado por {performed_by} ({system_name})"
+    suffix = f" | Desativado por {performed_by} ({system_name}) em {now}"
     new_description = base + suffix
 
     return new_description
