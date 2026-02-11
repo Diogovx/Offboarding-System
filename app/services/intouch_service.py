@@ -11,7 +11,9 @@ HEADERS = {"Authorization": f"Basic {settings.INTOUCH_TOKEN}"}
 
 def search_user(registration: str):
     services_list_view = []
-    print(f" Searching for the user with the registration number: {registration}")
+    print(
+        f" Searching for the user with the registration number: {registration}"
+    )
 
     if not settings.INTOUCH_TOKEN:
         return {"erro": "Token not configured"}
@@ -92,13 +94,19 @@ async def activate_user_intouch(registration: str):
         payload = {"status": "activated"}
         headers_update = {
             "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
-            "Content-Type": "application/vnd.staffbase.accessors.user-update.v1+json"
+            "Content-Type": (
+                "application/vnd.staffbase.accessors.user-update.v1+json"
+            )
         }
 
         try:
-            resp = requests.put(url_update, json=payload, headers=headers_update)
+            resp = requests.put(
+                url_update,
+                json=payload,
+                headers=headers_update
+            )
 
-            if resp.status_code in [HTTPStatus.OK, HTTPStatus.NO_CONTENT]:
+            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
                 return {
                     "success": True,
                     "message": f"User {name} was successfully renewed.",
@@ -107,7 +115,10 @@ async def activate_user_intouch(registration: str):
             else:
                 return {
                     "success": False,
-                    "error": f"Error in the Staffbase API when activating: {resp.text}"
+                    "error": (
+                        "Error in the Staffbase API when activating: "
+                        f"{resp.text}"
+                    )
                 }
         except Exception as e:
             return {"success": False, "error": f"Connection error: {str(e)}"}
@@ -122,7 +133,10 @@ async def activate_user_intouch(registration: str):
     else:
         return {
             "success": False,
-            "error": f"Status '{current_status}' does not allow automatic reactivation."
+            "error": (
+                f"Status '{current_status}' does "
+                "not allow automatic reactivation."
+            )
         }
 
 
@@ -148,12 +162,18 @@ async def deactivate_user_intouch(registration: str):
         payload = {"status": "deactivated"}
         headers_update = {
             "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
-            "Content-Type": "application/vnd.staffbase.accessors.user-update.v1+json"
+            "Content-Type": (
+                "application/vnd.staffbase.accessors.user-update.v1+json"
+            )
         }
 
         try:
-            resp = requests.put(url_update, json=payload, headers=headers_update)
-            if resp.status_code == HTTPStatus.OK or resp.status_code == HTTPStatus.NO_CONTENT:
+            resp = requests.put(
+                url_update,
+                json=payload,
+                headers=headers_update
+            )
+            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
                 return {
                     "success": True,
                     "message": f"User {name} was successfully DEACTIVATED.",
@@ -167,34 +187,48 @@ async def deactivate_user_intouch(registration: str):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    elif current_status in ['pending', 'created', 'invited']:
+    elif current_status in {'pending', 'created', 'invited'}:
         print(" Pending/Created user. Executing definitive DELETION.")
 
         url_delete = f"{settings.INTOUCH_URL}/{user_id}"
 
         try:
             resp = requests.delete(url_delete, headers=HEADERS)
-            if resp.status_code == HTTPStatus.OK or resp.status_code == HTTPStatus.NO_CONTENT:
+            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
                 return {
                     "success": True,
-                    "message": f"User invitation {name} was successfully DELETED.",
+                    "message": (
+                        f"User invitation {name} was successfully DELETED."
+                    ),
                     "acao": "exclusao"
                 }
             else:
-                return {"success": False, "error": f"Error during deletion: {resp.text}"}
+                return {
+                    "success": False,
+                    "error": f"Error during deletion: {resp.text}"
+                }
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    elif current_status in ['contact', 'deactivated']:
-        print(f" Status '{current_status}' is protected or already processed. No action taken.")
+    elif current_status in {'contact', 'deactivated'}:
+        print(
+            f" Status '{current_status}' is protected"
+            " or already processed. No action taken."
+        )
         return {
             "success": True,
-            "message": f"User {name} is set as '{current_status}' and does not need to be changed.",
+            "message": (
+                f"User {name} is set as '{current_status}' "
+                "and does not need to be changed."
+            ),
             "acao": "nenhuma"
         }
 
     else:
         return {
             "success": False,
-            "error": f"Unknown status ('{current_status}'). Operation canceled for safety."
+            "error": (
+                f"Unknown status ('{current_status}'). "
+                "Operation canceled for safety."
+            )
         }

@@ -137,7 +137,11 @@ class ADRepository:
 
         return self.search_users(search_filter)
 
-    def disable_account(self, dn: str, current_uac: int) -> None:
+    def disable_account(  # noqa: PLR6301
+        self,
+        dn: str,
+        current_uac: int
+    ) -> None:
         """
         Disable user account
 
@@ -172,7 +176,11 @@ class ADRepository:
                 logger.error(f"Error disabling account: {e}")
                 raise ADOperationError("Disable account", str(e))
 
-    def update_description(self, dn: str, new_description: str) -> None:
+    def update_description(  # noqa: PLR6301
+        self,
+        dn: str,
+        new_description: str
+    ) -> None:
         """
         Update user description
 
@@ -204,7 +212,11 @@ class ADRepository:
                 logger.error(f"Error updating description.: {e}")
                 raise ADOperationError("Update description", str(e))
 
-    def move_to_ou(self, dn: str, target_ou: str) -> None:
+    def move_to_ou(  # noqa: PLR6301
+        self,
+        dn: str,
+        target_ou: str
+    ) -> None:
         """
         Move user to another OU
 

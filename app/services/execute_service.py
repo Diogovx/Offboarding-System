@@ -7,11 +7,22 @@ from app.schemas import AuditLogCreate
 from app.services import email_service, intouch_service, turnstiles_service
 
 
-async def execute_offboarding(registration, current_user, ad_service, background_tasks, req: Request, db):
+async def execute_offboarding(
+    registration,
+    current_user,
+    ad_service,
+    background_tasks,
+    req: Request,
+    db
+):
     services_list = []
 
     try:
-        res_turnstiles = await turnstiles_service.deactivate_user_turnstiles(registration=registration)
+        res_turnstiles = await (
+            turnstiles_service.deactivate_user_turnstiles(
+                registration=registration
+            )
+        )
         if res_turnstiles.get("success"):
             services_list.append("Gate")
 
@@ -44,7 +55,9 @@ async def execute_offboarding(registration, current_user, ad_service, background
         )
 
     try:
-        res_intouch = await intouch_service.deactivate_user_intouch(registration)
+        res_intouch = await intouch_service.deactivate_user_intouch(
+            registration
+        )
         if res_intouch.get("success"):
             services_list.append("Intouch")
 
@@ -72,7 +85,10 @@ async def execute_offboarding(registration, current_user, ad_service, background
         ))
 
     try:
-        payload_ad = DisableUserRequest(registration=registration, performed_by=current_user.username)
+        payload_ad = DisableUserRequest(
+            registration=registration,
+            performed_by=current_user.username
+        )
 
         res_ad = ad_service.disable_user(payload_ad)
         services_list.append("Active Directory")

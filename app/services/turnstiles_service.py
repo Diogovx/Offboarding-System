@@ -4,8 +4,16 @@ import requests
 from app.security import settings
 
 TURNSTILES = [
-    {"name": "Unit A", "url": settings.TURNSTILE_A_URL, "session": settings.TURNSTILE_A_SESSION},
-    {"name": "Unit B", "url": settings.TURNSTILE_B_URL, "session": settings.TURNSTILE_B_SESSION}
+    {
+        "name": "Unit A",
+        "url": settings.TURNSTILE_A_URL,
+        "session": settings.TURNSTILE_A_SESSION
+    },
+    {
+        "name": "Unit B",
+        "url": settings.TURNSTILE_B_URL,
+        "session": settings.TURNSTILE_B_SESSION
+    }
 ]
 
 
@@ -26,7 +34,9 @@ async def deactivate_user_turnstiles(registration: str):
     }
 
     for turnstile in TURNSTILES:
-        url = f"{turnstile['url']}/modify_objects.fcgi?session={turnstile['session']}"
+        url = (
+            f"{turnstile['url']}/modify_objects.fcgi?session={turnstile['session']}"
+        )
         try:
             requests.post(url, json=payload, timeout=5)
         except Exception:

@@ -154,7 +154,9 @@ class ADService:
 
             user.enabled = False
             user.description = new_description
-            user.user_account_control = current_uac | UserAccountControl.ACCOUNTDISABLE
+            user.user_account_control = (
+                current_uac | UserAccountControl.ACCOUNTDISABLE
+            )
 
             return user
 
