@@ -1,10 +1,12 @@
+from logging import getLogger
+
 from fastapi import APIRouter, HTTPException, Request, status
+
 from app.audit.audit_log_service import create_audit_log
 from app.enums import AuditAction, AuditStatus
-from logging import getLogger
 from app.models import ADUser, DisableUserRequest
 from app.schemas import AuditLogCreate
-from app.security import Current_user, Db_session, ADServiceDep
+from app.security import ADServiceDep, Current_user, Db_session
 
 logger = getLogger(__name__)
 

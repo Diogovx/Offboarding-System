@@ -1,17 +1,20 @@
-from contextlib import contextmanager
-from typing import Generator
 import logging
+from contextlib import contextmanager
+from typing import Any, Generator
 
-from ldap3 import Connection, SUBTREE, MODIFY_REPLACE
+from ldap3 import MODIFY_REPLACE, SUBTREE, Connection
 from ldap3.core.exceptions import LDAPException
-from typing import Any
-from .connections import get_ldap_connection
+
 from app.security.security import settings
 from app.services.ad.constants import (
-    LDAP_ATTRS, MAX_SEARCH_RESULTS, UserAccountControl
+    LDAP_ATTRS,
+    MAX_SEARCH_RESULTS,
+    UserAccountControl,
 )
 from app.services.ad.exceptions import ADConnectionError, ADOperationError
 from app.services.ad.utils import escape_ldap_filter
+
+from .connections import get_ldap_connection
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +137,11 @@ class ADRepository:
 
         return self.search_users(search_filter)
 
-    def disable_account(self, dn: str, current_uac: int) -> None:
+    def disable_account(  # noqa: PLR6301
+        self,
+        dn: str,
+        current_uac: int
+    ) -> None:
         """
         Disable user account
 
@@ -169,7 +176,11 @@ class ADRepository:
                 logger.error(f"Error disabling account: {e}")
                 raise ADOperationError("Disable account", str(e))
 
-    def update_description(self, dn: str, new_description: str) -> None:
+    def update_description(  # noqa: PLR6301
+        self,
+        dn: str,
+        new_description: str
+    ) -> None:
         """
         Update user description
 
@@ -201,7 +212,11 @@ class ADRepository:
                 logger.error(f"Error updating description.: {e}")
                 raise ADOperationError("Update description", str(e))
 
-    def move_to_ou(self, dn: str, target_ou: str) -> None:
+    def move_to_ou(  # noqa: PLR6301
+        self,
+        dn: str,
+        target_ou: str
+    ) -> None:
         """
         Move user to another OU
 

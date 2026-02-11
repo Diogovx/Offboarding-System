@@ -1,4 +1,5 @@
 from http import HTTPStatus
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from app.enums import EmailActions
@@ -61,7 +62,7 @@ async def activate_user_intouch(
             status_code=400,
             detail=res_intouch.get("error", "Error while activating user")
         )
-    
+
     action = EmailActions.get_by_id(2)
     background_tasks.add_task(send_email, registration, action)
 

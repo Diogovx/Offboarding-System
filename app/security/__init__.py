@@ -4,6 +4,7 @@ from app.audit.cleanup.scheduler import start_scheduler
 from ..audit.audit_deps import Audit_log_list_filters
 from .deps import (
     Admin_user,
+    ADServiceDep,
     Current_user,
     Db_session,
     Editor_user,
@@ -12,8 +13,7 @@ from .deps import (
     get_current_user,
     require_admin,
     require_editor,
-    ADServiceDep,
-    settings
+    settings,
 )
 from .security import (
     create_access_token,
@@ -40,6 +40,5 @@ __all__ = [
     "Audit_log_list_filters",
     "RETENTION_POLICY",
     "start_scheduler",
-    "get_ldap_connection",
     "ADServiceDep"
 ]
