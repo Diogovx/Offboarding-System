@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -25,3 +26,8 @@ class AuditLogListFilters(BaseModel):
     date_to: datetime | None = None
     page: int = 1
     limit: int = 100
+
+
+class ExportContext(BaseModel):
+    format: Literal["csv", "jsonl"]
+    filters: AuditLogListFilters

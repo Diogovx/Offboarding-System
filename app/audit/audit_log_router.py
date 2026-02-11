@@ -1,12 +1,11 @@
 from datetime import timedelta
-from typing import Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse
 
 from app.enums import AuditAction, AuditStatus
-from app.schemas import AuditLogCreate
+from app.schemas import AuditLogCreate, ExportContext
 from app.security import Admin_user, Audit_log_list_filters, Db_session
 from app.services import (
     create_audit_log,
@@ -50,36 +49,37 @@ def list_logs(
 
 @router.post("/export")
 def export_audit_logs_async(
-    format: Literal["csv", "jsonl"],
-    filters: Audit_log_list_filters,
+    context: ExportContext,
     background_tasks: BackgroundTasks,
     session: Db_session,
     current_user: Admin_user,
     request: Request,
 ):
     limit_days = 90
-    if filters.date_from and filters.date_to:
-        if filters.date_to < filters.date_from:
+    if context.filters.date_from and context.filters.date_to:
+        if context.filters.date_to < context.filters.date_from:
             raise HTTPException(
                 status_code=400,
                 detail="date_to must be after date_from"
             )
 
-        if (filters.date_to - filters.date_from).days > limit_days:
+        if (
+            context.filters.date_to - context.filters.date_from
+        ).days > limit_days:
             raise HTTPException(
                 status_code=400,
                 detail="Date range cannot exceed 90 days"
             )
-    if filters.date_from and not filters.date_to:
-        filters.date_to = filters.date_from + timedelta(days=1)
+    if context.filters.date_from and not context.filters.date_to:
+        context.filters.date_to = context.filters.date_from + timedelta(days=1)
 
     job_id = uuid4().hex
-    filename = f"audit_logs_{job_id}.{format}"
+    filename = f"audit_logs_{job_id}.{context.format}"
 
     background_tasks.add_task(
         export_audit_logs_task,
-        format=format,
-        filters=filters,
+        format=context.format,
+        filters=context.filters,
         filename=filename,
     )
 
@@ -88,7 +88,7 @@ def export_audit_logs_async(
         AuditLogCreate(
             action=AuditAction.EXPORT_AUDIT_LOGS,
             status=AuditStatus.SUCCESS,
-            message=f"Audit log export started ({format} format)",
+            message=f"Audit log export started ({context.format} format)",
             user_id=current_user.id,
             username=current_user.username,
             resource=filename,
@@ -100,7 +100,7 @@ def export_audit_logs_async(
     return {
         "job_id": job_id,
         "status": "processing",
-        "format": format,
+        "format": context.format,
         "download_url": f"/logs/export/{filename}",
         "message": '''Export is being processed.
         Check download_url in a few moments.'''
