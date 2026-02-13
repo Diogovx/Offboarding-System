@@ -54,8 +54,8 @@ def search_user(registration: str):
 
         if status_intouch == 'activated':
             services_list_view.append("Intouch")
-            services_list_view.append("Gate")
-            services_list_view.append("AD")
+            services_list_view.append("Acesso")
+            services_list_view.append("Rede")
 
         return {
             "success": True,
