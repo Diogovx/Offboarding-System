@@ -24,7 +24,7 @@ async def execute_offboarding(
             )
         )
         if res_turnstiles.get("success"):
-            services_list.append("Gate")
+            services_list.append("Acesso")
 
             create_audit_log(
                 db,
@@ -91,7 +91,7 @@ async def execute_offboarding(
         )
 
         res_ad = ad_service.disable_user(payload_ad)
-        services_list.append("Active Directory")
+        services_list.append("Rede")
 
         create_audit_log(db, AuditLogCreate(
             action=AuditAction.DISABLE_AD_USER,

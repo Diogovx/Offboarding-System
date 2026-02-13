@@ -22,12 +22,12 @@ async def send_email(
 
     if systems_list and len(systems_list) > 0:
         items = "\n".join([f"- {s}" for s in systems_list])
-        txt_details = f"\nSystems processed successfully:\n{items}"
+        txt_details = f"\nSistemas afetados com sucesso:\n{items}"
     else:
 
         txt_details = (
-            "\nWarning: No systems were successfully "
-            "updated in this task.")
+            "\nAtenção: Nenhum sistema afetado com sucesso "
+            )
 
     msg = EmailMessage()
     msg["Subject"] = f"Offboarding Log - {registration}"
@@ -35,11 +35,11 @@ async def send_email(
     msg["To"] = settings.EMAIL_RECEIVER
 
     msg.set_content(
-        f"The user with registration {registration} "
-        f"was processed ({action.value}).\n"
+        f"O usuário com o registro {registration} "
+        f"passou pelo processo de: ({action.value}).\n"
         f"Executor: {performed_by}\n"
         f"{txt_details}\n"
-        f"Date/Time: {now}"
+        f"Data/Hora: {now}"
     )
 
     context = ssl.create_default_context()
