@@ -110,7 +110,7 @@ async def activate_user_intouch(registration: str):
                 return {
                     "success": True,
                     "message": f"User {name} was successfully renewed.",
-                    "acao": "Activation"
+                    "action": "Activation"
                 }
             else:
                 return {
@@ -127,7 +127,7 @@ async def activate_user_intouch(registration: str):
         return {
             "success": True,
             "message": f"User {name}: The user is already active.",
-            "acao": "none"
+            "action": "none"
         }
 
     else:
@@ -177,7 +177,7 @@ async def deactivate_user_intouch(registration: str):
                 return {
                     "success": True,
                     "message": f"User {name} was successfully DEACTIVATED.",
-                    "acao": "desativacao"
+                    "action": "disable"
                 }
             else:
                 return {
@@ -200,7 +200,7 @@ async def deactivate_user_intouch(registration: str):
                     "message": (
                         f"User invitation {name} was successfully DELETED."
                     ),
-                    "acao": "exclusao"
+                    "action": "delete"
                 }
             else:
                 return {
@@ -221,7 +221,7 @@ async def deactivate_user_intouch(registration: str):
                 f"User {name} is set as '{current_status}' "
                 "and does not need to be changed."
             ),
-            "acao": "nenhuma"
+            "action": "nothing"
         }
 
     else:

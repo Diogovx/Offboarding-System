@@ -27,7 +27,7 @@ async def send_email(
 
         txt_details = (
             "\nAtenção: Nenhum sistema afetado com sucesso "
-            "Atualizando a task")
+            )
 
     msg = EmailMessage()
     msg["Subject"] = f"Offboarding Log - {registration}"
