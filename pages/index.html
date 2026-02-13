@@ -17,12 +17,23 @@
       }
     </style>
 </head>
-<body class="h-full bg-white">
 
-    <div id="app" class="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-sm text-center">
-            <div class="mx-auto h-16 w-40 bg-cladtek rounded-full mb-6 flex items-center justify-center text-white font-bold text-xl">
-                Offboarding
+  
+<body class="h-full m-0 p-0 overflow-hidden">
+
+    <div class="fixed inset-0 z-0 w-full h-full">
+        <div class="absolute inset-0 bg-cover bg-center opacity-30" 
+             style="background-image: url('../app/assets/img/backgroundBlue.png');">
+        </div>
+    </div>
+
+    <div id="app" class="relative z-10 flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <div class="text-center">
+                 <div class="mx-auto h-16 w-40 bg-cladtek rounded-full mb-6 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    Offboarding
+                </div>
             </div>
             
         </div>
@@ -63,6 +74,7 @@
                 <a href="https://helpdesk.cladtek.com/" class="font-semibold text-cladtek hover:underline">Acione o time de TI!</a>
             </p>
         </div>
+    </div>
     </div>
     <script src="../app/assets/js/script.js"></script>
 </body>
