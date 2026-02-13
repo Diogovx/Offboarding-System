@@ -104,7 +104,7 @@ class ADRepository:
 
     def search_by_registration(self, registration: str) -> list[Any]:
         """
-        Search for users by registration number (description field)
+        Search for users by registration number (EmployeeID field)
 
         Args:
         registration: Registration number to search for
@@ -115,7 +115,7 @@ class ADRepository:
         search_filter = (
             f"(&"
             f"(objectClass=user)"
-            f"(description=*{safe_registration}*)"
+            f"(EmployeeID=*{safe_registration}*)"
             f")"
         )
 
