@@ -129,7 +129,7 @@ def build_disabled_description(
     """
     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     base = old_description or ""
-    suffix = f" | Desativado por {performed_by} ({system_name}) em {now}"
+    suffix = f" Desativado por {performed_by} ({system_name}) em {now}"
     new_description = base + suffix
 
     return new_description
