@@ -10,6 +10,7 @@ dependencies = [
     "dotenv>=0.9.9",
     "fastapi[standard]>=0.119.0",
     "ldap3>=2.9.1",
+    "openpyxl>=3.1.5",
     "passlib[bcrypt]>=1.7.4",
     "pwdlib[argon2]>=0.2.1",
     "pydantic-settings>=2.12.0",
@@ -17,10 +18,13 @@ dependencies = [
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "python-jose[cryptography]>=3.5.0",
+    "reportlab>=4.4.10",
     "requests>=2.32.5",
     "ruff>=0.14.6",
     "sqlalchemy>=2.0.44",
     "taskipy>=1.14.1",
+    "types-openpyxl>=3.1.5.20250919",
+    "types-reportlab>=4.4.10.20260216",
     "tzdata>=2025.3",
 ]
 
