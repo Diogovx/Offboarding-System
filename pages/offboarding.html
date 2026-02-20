@@ -22,11 +22,48 @@
 <body class="h-full">
     <div id="app" class="min-h-full flex flex-col">
         
-        <nav class="bg-cladtek p-4 text-white shadow-lg flex justify-between items-center">
-            <span class="font-bold text-lg tracking-wide">Cladtek | Offboarding</span>
-            <div class="flex items-center gap-4 text-sm">
-                <span>Olá, <strong>{{ currentUser }}</strong></span>
-                <button @click="logout" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors cursor-pointer">Logout</button>
+        <nav class="bg-cladtek shadow-lg text-white">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <!-- Logo + links desktop -->
+                <div class="flex items-center gap-6">
+                    <span class="font-bold text-lg tracking-wide">Cladtek</span>
+                    <div class="hidden sm:flex items-center gap-4 text-sm">
+                        <a href="offboarding.html"
+                            class="text-white/80 hover:text-white transition-colors"
+                            :class="{ 'font-semibold border-b-2 border-white text-white': currentPage === 'offboarding' }">
+                            Offboarding
+                        </a>
+                        <!-- Outros links aqui -->
+                        <a v-if="isAdmin" href="audit_logs.html"
+                            class="text-white/80 hover:text-white transition-colors"
+                            :class="{ 'font-semibold border-b-2 border-white text-white': currentPage === 'logs' }">
+                            Logs
+                        </a>
+                    </div>
+                </div>
+
+                <!-- User info + logout (desktop) + hamburguer (mobile) -->
+                <div class="flex items-center gap-3 text-sm">
+                    <span class="hidden sm:inline">Olá, <strong>{{ currentUser }}</strong></span>
+                    <button @click="logout" class="hidden sm:block bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors">Logout</button>
+                    <!-- Botão hamburguer -->
+                    <button @click="menuOpen = !menuOpen" class="sm:hidden p-1 rounded hover:bg-white/20 transition-colors">
+                        <svg v-if="!menuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Menu mobile dropdown -->
+            <div v-show="menuOpen" class="sm:hidden border-t border-white/20 py-2 px-4 flex flex-col gap-2 text-sm">
+                <span class="text-white/70">Olá, <strong class="text-white">{{ currentUser }}</strong></span>
+                <a href="offboarding.html" class="text-white/80 hover:text-white py-1 transition-colors">Offboarding</a>
+                <a v-if="isAdmin" href="audit_logs.html" class="text-white/80 hover:text-white py-1 transition-colors">Logs</a>
+                <button @click="logout" class="text-left text-white/80 hover:text-white py-1 transition-colors">Logout</button>
             </div>
         </nav>
 
@@ -37,7 +74,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Busque por um colaborador</label>
                 <div class="flex gap-2">
                     <input v-model="searchQuery" @keyup.enter="searchUser" type="text" placeholder="Matrícula" 
-                           class="block w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-cladtek transition-all">
+                        class="block w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-cladtek transition-all">
                     <button @click="searchUser" :disabled="isLoading" class="bg-cladtek hover:bg-cladtek-dark text-white px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50 min-w-[100px]">
                         {{ isLoading ? '...' : 'Buscar' }}
                     </button>
@@ -50,7 +87,7 @@
                     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
                         <div>
                             <p class="text-2xl font-bold text-gray-900">Nome: {{ foundUser.name }}</p>
-                           <br>
+                            <br>
                             <p class="text-xl text-gray-500 font-mono">Matrícula: {{ foundUser.registration }}</p>
                             <p class="text-xl text-gray-500 font-mono">Departamento: {{ foundUser.role}} </p>
                             <p class="text-xl text-gray-500 font-mono">Status: {{foundUser.current_status}}</p>

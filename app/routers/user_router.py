@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.security import OAuth2PasswordBearer
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
@@ -33,7 +33,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def list_users(
     session: Db_session,
     current_user: Current_user,
-    filter_users: Annotated[FilterPage, Query()]
+    filter_users: Annotated[FilterPage, Query()],
+    request: Request
 ):
     users = session.scalars(
         select(User).offset(filter_users.offset).limit(filter_users.limit)
@@ -49,6 +50,8 @@ def list_users(
             user_id=current_user.id,
             username=current_user.username,
             resource="/users",
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
         ),
     )
 
@@ -56,7 +59,7 @@ def list_users(
 
 
 @router.post("/test", response_model=UserPublic)
-def create_test_user(session: Db_session):
+def create_test_user(session: Db_session, request: Request):
     existing_user = (
         session.query(User).filter(User.username == "test-user").first()
     )
@@ -82,6 +85,8 @@ def create_test_user(session: Db_session):
             user_id=None,
             username="system",
             resource="test-user",
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
         ),
     )
 
@@ -96,6 +101,7 @@ def create_user(
     user: UserCreate,
     session: Db_session,
     current_user: Editor_user,
+    request: Request
 ):
 
     db_user = (
@@ -131,6 +137,8 @@ def create_user(
                 user_id=current_user.id,
                 username=current_user.username,
                 resource=user.username,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
             ),
         )
     except HTTPException:
@@ -143,6 +151,8 @@ def create_user(
                 user_id=current_user.id,
                 username=current_user.username,
                 resource=user.username,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
             ),
         )
     session.add(db_user)
@@ -157,7 +167,8 @@ def update_user(
     username: str,
     user: User,
     session: Db_session,
-    current_user: Editor_user
+    current_user: Editor_user,
+    request: Request
 ):
     db_user = session.scalar(
         select(User).where(User.username == username)
@@ -172,6 +183,8 @@ def update_user(
                 user_id=current_user.id,
                 username=current_user.username,
                 resource=username,
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
             ),
         )
         raise HTTPException(
@@ -193,6 +206,8 @@ def update_user(
             user_id=current_user.id,
             username=current_user.username,
             resource=username,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
         ),
     )
 
@@ -201,7 +216,10 @@ def update_user(
 
 @router.get("/me", response_model=UserPublic)
 def read_users_me(
-    token: Token, session: Db_session, current_user: Current_user
+    token: Token,
+    session: Db_session,
+    current_user: Current_user,
+    request: Request
 ):
     try:
         payload = decode(
@@ -213,17 +231,6 @@ def read_users_me(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail="Invalid authentication token",
             )
-        create_audit_log(
-            session,
-            AuditLogCreate(
-                action=AuditAction.READ_CURRENT_USER,
-                status=AuditStatus.SUCCESS,
-                message="Read own profile",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource="/users/me",
-            ),
-        )
     except ExpiredSignatureError:
         create_audit_log(
             session,
@@ -234,6 +241,8 @@ def read_users_me(
                 user_id=None,
                 username=None,
                 resource="/users/me",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
             ),
         )
         raise HTTPException(
@@ -250,6 +259,8 @@ def read_users_me(
                 user_id=None,
                 username=None,
                 resource="/users/me",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
             ),
         )
         raise HTTPException(
@@ -268,6 +279,8 @@ def read_users_me(
                 user_id=None,
                 username=None,
                 resource="/users/me",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
             ),
         )
         raise HTTPException(
