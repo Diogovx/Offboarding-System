@@ -29,5 +29,21 @@ class AuditLogListFilters(BaseModel):
 
 
 class ExportContext(BaseModel):
-    format: Literal["csv", "jsonl"]
+    format: Literal["csv", "jsonl", "pdf", "xlsx"]
     filters: AuditLogListFilters
+
+
+class AuditLogList(BaseModel):
+    items: list[dict]
+    total: int | None
+    page: int
+    limit: int
+    pages: int
+
+
+class AuditLogExportedStatus(BaseModel):
+    job_id: str
+    status: str
+    format: Literal["csv", "jsonl", "pdf", "xlsx"]
+    download_url: str
+    message: str
