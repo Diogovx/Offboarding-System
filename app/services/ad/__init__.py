@@ -7,6 +7,7 @@ from .exceptions import (
     MultipleUsersFoundError,
 )
 from .services import ADService
+from .dependencies import ADServiceDep
 
 __all__ = [
     "ADService",
@@ -15,5 +16,6 @@ __all__ = [
     "ADOperationError",
     "InvalidInputError",
     "MultipleUsersFoundError",
-    "get_ldap_connection"
+    "get_ldap_connection",
+    "ADServiceDep"
 ]

@@ -5,7 +5,7 @@ from typing import Any, Generator
 from ldap3 import MODIFY_REPLACE, SUBTREE, Connection
 from ldap3.core.exceptions import LDAPException
 
-from app.security.security import settings
+from app.config import settings
 from app.services.ad.constants import (
     LDAP_ATTRS,
     MAX_SEARCH_RESULTS,
