@@ -1,4 +1,4 @@
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, onMounted, computed } = Vue;
 
 createApp({
   setup() {
@@ -13,6 +13,8 @@ createApp({
     const isLoading = ref(false);
     const isProcessing = ref(false);
     const showConfirmModal = ref(false);
+
+    const lastOffboarding = ref(null);
 
     const searchMessage = ref("");
     const searchStatusClass = ref("");
@@ -53,6 +55,19 @@ createApp({
         }
     };
 
+    const isOffboarded = computed(() => {
+        if (lastOffboarding.value) return true;
+        if(foundUser.value && foundUser.value.is_active === false) return true;
+        return false;
+    });
+
+    const displayServices = computed(() => {
+        if(lastOffboarding.value && lastOffboarding.value.revoked_systems){
+            return lastOffboarding.value.revoked_systems;
+        }
+        return listServices.value;
+    });
+
     const searchUser = async () => {
         if (!searchQuery.value.trim()) return;
 
@@ -61,13 +76,22 @@ createApp({
 
         foundUser.value = null;
         listServices.value = [];
+        lastOffboarding.value = null;
 
         try {
             const response = await axios.get(`/intouch/${searchQuery.value}`);
+            const response_services = await axios.get(`/offboarding/search/${searchQuery.value}`);
+            const response_history = await axios.get(`/offboarding/history/`, {
+                params: { registration: searchQuery.value, limit: 1 }
+            });
 
             if (response.data && response.data.found === true) {
                 foundUser.value = response.data;
-                listServices.value = response.data.services || [];
+                listServices.value = response_services.data || [];
+
+                if(response_history.data && response_history.data.total > 0){
+                    lastOffboarding.value = response_history.data.items[0];
+                }
             } else {
                 searchMessage.value = "Registration number not found in the system.";
                 searchStatusClass.value = "text-red-500 font-medium";
@@ -100,15 +124,15 @@ createApp({
             actionMessage.value = `Success! Systems affected: ${response.data.details.join(", ")}`;
             actionClass.value = "bg-green-50 border-green-500 text-green-700";
             foundUser.value = null;
+            lastOffboarding.value = null;
         }
         } catch (error) {
-        const msg =
-            error.response?.data?.detail || "Error processing offboarding.";
-        actionMessage.value = `Failed: ${msg}`;
-        actionClass.value = "bg-red-50 border-red-500 text-red-700";
-        showConfirmModal.value = false;
+            const msg = error.response?.data?.detail || "Error processing offboarding.";
+            actionMessage.value = `Failed: ${msg}`;
+            actionClass.value = "bg-red-50 border-red-500 text-red-700";
+            showConfirmModal.value = false;
         } finally {
-        isProcessing.value = false;
+            isProcessing.value = false;
         }
     };
 
@@ -133,6 +157,9 @@ createApp({
         actionClass,
         listServices,
         showConfirmModal,
+        lastOffboarding,
+        isOffboarded,
+        displayServices,
         searchUser,
         executeOffboarding,
         confirmOffboarding,

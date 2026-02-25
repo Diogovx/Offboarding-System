@@ -98,17 +98,51 @@
                             Offboarding
                         </button>
                     </div>
-
-                    <div class="mt-2">
-                        <p class="text-[13px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sistemas identificados</p>
-                        <div class="flex flex-wrap gap-2">
-                            <template v-if="listServices && listServices.length > 0">
-                                <span v-for="service in listServices" :key="service" class="px-6 py-1 bg-cladtek/10 text-cladtek text-1x1 font-bold rounded-full border border-cladtek/20">
-                                    {{ service }}
+                    <div class="mt-6">
+                        <template v-if="isOffboarded">
+                            <div class="flex items-center gap-2 mb-3">
+                                <p class="text-[13px] font-bold text-red-500 uppercase tracking-widest">
+                                    ⚠ Serviços desativados / Inativo
+                                </p>
+            
+                                <span v-if="lastOffboarding" class="text-xs text-gray-400">
+                                    (em {{ new Date(lastOffboarding.offboarded_at).toLocaleDateString('pt-BR') }} 
+                                    por {{ lastOffboarding.performed_by }})
                                 </span>
-                            </template>
-                            <span v-else class="text-sm text-gray-400 italic font-light">Nenhum sistema identificado </span>
-                        </div>
+                                <span v-else class="text-xs text-gray-400">
+                                    (Status atual: {{ foundUser?.current_status }})
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                <template v-if="displayServices && displayServices.length > 0">
+                                    <span v-for="service in displayServices" :key="service" 
+                                    class="px-4 py-1 bg-red-50 text-red-600 text-sm font-bold rounded-full border border-red-200">
+                                        {{ service }}
+                                    </span>
+                                </template>
+                                <span v-else class="text-sm text-gray-400 italic font-light">
+                                    Nenhum sistema identificado.
+                                </span>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <p class="text-[13px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                                Sistemas identificados
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <template v-if="displayServices && displayServices.length > 0">
+                                    <span v-for="service in displayServices" :key="service" 
+                                    class="px-6 py-1 bg-cladtek/10 text-cladtek text-sm font-bold rounded-full border border-cladtek/20">
+                                        {{ service }}
+                                    </span>
+                                </template>
+                                <span v-else class="text-sm text-gray-400 italic font-light">
+                                    Nenhum sistema identificado.
+                                </span>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -117,6 +151,8 @@
                 <p class="font-medium">{{ actionMessage }}</p>
             </div>
         </main>
+
+        <!--Confirm Modal-->
 
         <div v-if="showConfirmModal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
