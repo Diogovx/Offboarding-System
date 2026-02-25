@@ -56,13 +56,23 @@ createApp({
     };
 
     const isOffboarded = computed(() => {
-        if (lastOffboarding.value) return true;
-        if(foundUser.value && foundUser.value.is_active === false) return true;
+        if (foundUser.value && foundUser.value.is_active === true) {
+            return false;
+        }
+        if (lastOffboarding.value) {
+            return true;
+        }
+        if (foundUser.value && foundUser.value.is_active === false) {
+            return true;
+        }
+
         return false;
     });
-
     const displayServices = computed(() => {
-        if(lastOffboarding.value && lastOffboarding.value.revoked_systems){
+        if (!isOffboarded.value) {
+            return listServices.value;
+        }
+        if (lastOffboarding.value && lastOffboarding.value.revoked_systems) {
             return lastOffboarding.value.revoked_systems;
         }
         return listServices.value;
@@ -73,6 +83,8 @@ createApp({
 
         isLoading.value = true;
         searchMessage.value = "";
+
+        actionMessage.value = "";
 
         foundUser.value = null;
         listServices.value = [];
