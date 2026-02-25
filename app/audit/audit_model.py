@@ -20,6 +20,12 @@ class AuditLog:
         nullable=True
     )
     username: Mapped[str | None]
+
+    target_user_id: Mapped[UUID | None] = mapped_column(
+        SqliteUUID(), nullable=True
+    )
+    target_username: Mapped[str | None]
+    target_registration: Mapped[str | None]
     resource: Mapped[str | None]
 
     ip_address: Mapped[str | None]

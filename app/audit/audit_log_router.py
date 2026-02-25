@@ -4,6 +4,7 @@ from uuid import uuid4
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse
 
+from app.database import Db_session
 from app.enums import AuditAction, AuditStatus
 from app.schemas import (
     AuditLogCreate,
@@ -11,7 +12,7 @@ from app.schemas import (
     AuditLogList,
     AuditLogExportedStatus
 )
-from app.security import Admin_user, Audit_log_list_filters, Db_session
+from app.security import Admin_user, Audit_log_list_filters
 from app.services import (
     create_audit_log,
     export_audit_logs_task,
