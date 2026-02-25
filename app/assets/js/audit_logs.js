@@ -2,14 +2,12 @@ const { createApp, ref, reactive, onMounted } = Vue;
 
 const API_BASE = 'http://127.0.0.1:8000';
 
-// Axios interceptor - token em todas as requisições
 axios.interceptors.request.use(cfg => {
     const token = localStorage.getItem('access_token');
     if (token) cfg.headers.Authorization = `Bearer ${token}`;
     return cfg;
 });
 
-// Redireciona para login se 401
 axios.interceptors.response.use(
     r => r,
     err => {
@@ -21,6 +19,9 @@ axios.interceptors.response.use(
 createApp({
     setup() {
         const currentUser = ref(localStorage.getItem('username') || '');
+        const isAdmin = ref(false)
+        const currentPage = ref('logs');
+        const menuOpen = ref(false)
         const logs = ref([]);
         const loading = ref(false);
         const error = ref('');
@@ -28,7 +29,6 @@ createApp({
         const exportMsg = ref('');
         const exportError = ref(false);
 
-        // Ações disponíveis para filtro - idealmente buscar do backend
         const availableActions = ref([
             {label: 'Login', value: 'system_login'},
             {label: 'Offboarding (Rede)', value: 'disable_ad_user'},
@@ -138,7 +138,7 @@ createApp({
                 return;
             }
             try {
-                const resp = await axios.get(`${API_BASE}${url}`, { responseType: 'blob' });
+                const resp = await axios.get(`${url}`, { responseType: 'blob' });
                 const blob = new Blob([resp.data]);
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
@@ -148,7 +148,6 @@ createApp({
                 setTimeout(() => exportMsg.value = '', 4000);
             } catch (e) {
                 if (e.response?.status === 404) {
-                    // Arquivo ainda não pronto
                     await new Promise(r => setTimeout(r, 1500));
                     await pollDownload(url, jobId, attempts + 1);
                 } else {
@@ -164,11 +163,13 @@ createApp({
             window.location.href = 'index.html';
         };
 
-        // Verificação de acesso admin no frontend (a segurança real está no backend)
-        const checkAdminAccess = async () => {
+        const checkAdmin = async () => {
             try {
                 const { data } = await axios.get("/users/me");
-                if (data.userRole !== 1) {
+                if (data.userRole === 1){
+                    isAdmin.value = true;
+                }
+                else {
                     window.location.href = 'offboarding.html';
                 }
             } catch {
@@ -181,16 +182,32 @@ createApp({
                 window.location.href = 'index.html';
                 return;
             }
-            await checkAdminAccess();
+            await checkAdmin();
             fetchLogs();
         });
 
         return {
-            currentUser, logs, loading, error,
-            exporting, exportMsg, exportError,
-            filters, availableActions,actionLabels,
-            fetchLogs, applyFilters, clearFilters,
-            prevPage, nextPage, exportLogs, formatDate, logout
+            currentUser,
+            menuOpen,
+            isAdmin, 
+            currentPage,   
+            logs,
+            loading,
+            error,
+            exporting,
+            exportMsg,
+            exportError,
+            filters,
+            availableActions,
+            actionLabels,
+            fetchLogs,
+            applyFilters,
+            clearFilters,
+            prevPage,
+            nextPage,
+            exportLogs,
+            formatDate,
+            logout
         };
     }
 }).mount('#app');
