@@ -8,6 +8,7 @@
     <script src="../app/assets/js/libs/tailwind.js"></script>
     <script src="../app/assets/js/libs/vue.global.js"></script>
     <script src="../app/assets/js/libs/axios.min.js"></script>
+    <link rel="shortcut icon" href="../app/assets/img/favicon.png" type="image/x-icon">
 
     <style type="text/tailwindcss">
       @theme {
@@ -26,7 +27,7 @@
             <div class="px-4 py-3 flex items-center justify-between">
                 <!-- Logo + links desktop -->
                 <div class="flex items-center gap-6">
-                    <span class="font-bold text-lg tracking-wide">Cladtek</span>
+                    <span class="font-bold text-lg tracking-wide"><img src="../app/assets/img/logo.png" alt="logo"></span>
                     <div class="hidden sm:flex items-center gap-4 text-sm">
                         <a href="offboarding.html"
                             class="text-white/80 hover:text-white transition-colors"
@@ -131,9 +132,12 @@
         
                             <div class="flex flex-wrap gap-2">
                                 <template v-if="displayServices && displayServices.length > 0">
-                                    <span v-for="service in displayServices" :key="service" 
-                                          class="px-4 py-1 bg-red-50 text-red-600 text-sm font-bold rounded-full border border-red-200">
-                                        {{ service }}
+                                    <span v-for="service in displayServices" :key="service.name" 
+                                          class="px-4 py-1 text-sm font-bold rounded-full border transition-colors"
+                                          :class="service.active
+                                          ? 'bg-cladtek/10 text-cladtek border-cladtek/20'
+                                          : 'bg-red-50 text-red-600 border-red-200'">
+                                        {{ service.name }}
                                     </span>
                                 </template>
                                 <span v-else class="text-sm text-gray-400 italic font-light">
@@ -148,9 +152,9 @@
                             </p>
                             <div class="flex flex-wrap gap-2">
                                 <template v-if="displayServices && displayServices.length > 0">
-                                    <span v-for="service in displayServices" :key="service" 
+                                    <span v-for="service in displayServices" :key="service.name" 
                                           class="px-6 py-1 bg-cladtek/10 text-cladtek text-sm font-bold rounded-full border border-cladtek/20">
-                                        {{ service }}
+                                        {{ service.name }}
                                     </span>
                                 </template>
                                 <span v-else class="text-sm text-gray-400 italic font-light">
@@ -188,7 +192,10 @@
                                     <div class="mt-2">
                                         <p class="text-sm text-gray-500">
                                             Tem certeza que deseja desativar o usuário <strong>{{ foundUser?.name }} ({{foundUser?.registration}})</strong>? 
-                                            Acesso a serem desativados: <span class="text-cladtek-dark font-semibold">{{ listServices.join(', ') }}</span>. 
+                                            Acesso a serem desativados: 
+                                            <span class="text-cladtek-dark font-semibold">
+                                                {{ servicesToDeactivateString || 'Nenhum sistema ativo detectado' }}
+                                            </span>. 
                                             Essa ação não poderá ser desfeita.
                                         </p>
                                     </div>

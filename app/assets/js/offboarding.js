@@ -21,7 +21,7 @@ createApp({
     const actionMessage = ref("");
     const actionClass = ref("");
     const listServices = ref([]);
-
+    
     onMounted(() => {
         const token = localStorage.getItem("access_token");
         
@@ -69,13 +69,21 @@ createApp({
         return false;
     });
     const displayServices = computed(() => {
-        if (!isOffboarded.value) {
+        if (listServices.value && listServices.value.length > 0) {
             return listServices.value;
         }
         if (lastOffboarding.value && lastOffboarding.value.revoked_systems) {
-            return lastOffboarding.value.revoked_systems;
+            return lastOffboarding.value.revoked_systems.map(s => ({ name: s, active: false }));
         }
-        return listServices.value;
+        return [];
+    });
+    const servicesToDeactivateString = computed(() => {
+        if (!listServices.value || listServices.value.length === 0) return "";
+        
+        return listServices.value
+            .filter(s => s.active)
+            .map(s => s.name)
+            .join(', ');
     });
 
     const searchUser = async () => {
@@ -99,18 +107,22 @@ createApp({
 
             if (response.data && response.data.found === true) {
                 foundUser.value = response.data;
-                listServices.value = response_services.data || [];
+                const servicesObj = response_services.data || {};
+                listServices.value = Object.keys(servicesObj).map(key => ({
+                    name: key,
+                    active: servicesObj[key]
+                }));
 
                 if(response_history.data && response_history.data.total > 0){
                     lastOffboarding.value = response_history.data.items[0];
                 }
             } else {
-                searchMessage.value = "Registration number not found in the system.";
+                searchMessage.value = "Matrícula não encontrada no sistema.";
                 searchStatusClass.value = "text-red-500 font-medium";
             }
         } catch (error) {
                 console.error("Search error:", error);
-                searchMessage.value = "Connection error.";
+                searchMessage.value = "Erro de conexão.";
                 searchStatusClass.value = "text-red-500 font-medium";
         } finally {
             isLoading.value = false;
@@ -133,14 +145,14 @@ createApp({
             );
         if (response.data.success) {
             showConfirmModal.value = false;
-            actionMessage.value = `Success! Systems affected: ${response.data.details.join(", ")}`;
+            actionMessage.value = `Sucesso! Sistemas afetados: ${response.data.details.join(", ")}.`;
             actionClass.value = "bg-green-50 border-green-500 text-green-700";
             foundUser.value = null;
             lastOffboarding.value = null;
         }
         } catch (error) {
-            const msg = error.response?.data?.detail || "Error processing offboarding.";
-            actionMessage.value = `Failed: ${msg}`;
+            const msg = error.response?.data?.detail || "Erro ao processar.";
+            actionMessage.value = `Falha: ${msg}`;
             actionClass.value = "bg-red-50 border-red-500 text-red-700";
             showConfirmModal.value = false;
         } finally {
@@ -172,6 +184,7 @@ createApp({
         lastOffboarding,
         isOffboarded,
         displayServices,
+        servicesToDeactivateString,
         searchUser,
         executeOffboarding,
         confirmOffboarding,
