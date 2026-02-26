@@ -14,6 +14,7 @@ from app.services.ad.utils import (
     validate_performed_by,
     validate_registration,
 )
+from app.services.ad.schemas import ADUserDisableResponse
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,10 @@ class ADService:
 
         return self._entry_to_model(entries[0])
 
-    def disable_user(self, request: DisableUserRequest) -> ADUser:
+    def disable_user(
+        self,
+        request: DisableUserRequest
+    ) -> ADUserDisableResponse:
         """
         Disable user in Active Directory and move to Deactivated OU
 
@@ -130,7 +134,13 @@ class ADService:
             logger.warning(
                 f"The user is already disabled: {user.sam_account_name}"
             )
-            return user
+            return ADUserDisableResponse(
+                success=True,
+                action="already_disabled",
+                user=user,
+                message=f"User {user.sam_account_name}"
+                " was already disabled — no action taken"
+            )
 
         dn = user.distinguished_name
         current_uac = user.user_account_control
@@ -158,7 +168,13 @@ class ADService:
                 current_uac | UserAccountControl.ACCOUNTDISABLE
             )
 
-            return user
+            return ADUserDisableResponse(
+                success=True,
+                action="disabled",
+                user=user,
+                message=f"User '{user.sam_account_name}' "
+                "({user.name}) deactivated successfully by {performed_by}",
+            )
 
         except Exception as e:
             logger.error(
