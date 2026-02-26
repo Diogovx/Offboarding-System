@@ -1,234 +1,249 @@
 from http import HTTPStatus
 
 import requests
+from logging import getLogger
+from app.config import settings
+from app.schemas import (
+    InTouchUserSearchModel,
+    InTouchActivateUserModel,
+    InTouchDeactivateUserModel
+)
 
-from app.security import Settings
+logger = getLogger("uvcorn.error")
 
-settings = Settings()
+ACTIVE_STATUSES = {"activated"}
 
-HEADERS = {"Authorization": f"Basic {settings.INTOUCH_TOKEN}"}
+DEACTIVE_STATUSES = {"activated"}
+
+DELETABLE_STATUSES = {"pending", "created", "invited"}
+
+PROTECTED_STATUSES = {"contact", "deactivated"}
 
 
-def search_user(registration: str):
-    services_list_view = []
-    print(
-        f" Searching for the user with the registration number: {registration}"
-    )
+def _get_headers(content_type: str | None = None) -> dict:
+    headers = {"Authorization": f"Basic {settings.INTOUCH_TOKEN}"}
+    if content_type:
+        headers["Content-Type"] = content_type
+    return headers
 
+
+def _validate_config() -> dict | None:
     if not settings.INTOUCH_TOKEN:
-        return {"erro": "Token not configured"}
+        return {"success": False, "error": "InTouch token not configured"}
     if not settings.INTOUCH_URL:
-        return {"erro": "URL not configured"}
+        return {"success": False, "error": "InTouch URL not configured"}
+    return None
 
-    filtro = f'profile.employeeid eq "{registration}"'
+
+def search_user(registration: str) -> InTouchUserSearchModel:
+    logger.info(f"Searching InTouch user: {registration}")
+
+    if err := _validate_config():
+        return InTouchUserSearchModel(error=str(err), registration="")
+
+    filter = f'profile.employeeid eq "{registration}"'
 
     try:
         response = requests.get(
-            settings.INTOUCH_URL, params={"filter": filtro}, headers=HEADERS
+            settings.INTOUCH_URL,
+            params={"filter": filter},
+            headers=_get_headers(),
+            timeout=10
+        )
+    except requests.RequestException as e:
+        logger.error(f"Intouch connection error: {e}")
+        return InTouchUserSearchModel(
+            success=False,
+            error=f"Connection error: {str(e)}"
         )
 
-        if response.status_code != HTTPStatus.OK:
-            return {
-                "erro": f"Staffbase API Error: {response.status_code}",
-                "success": False, "details": response.text
+    if response.status_code != HTTPStatus.OK:
+        return InTouchUserSearchModel(
+            success=False,
+            details=response.text,
+            error=f"Staffbase API Error: {response.status_code}"
+        )
+
+    json_res = response.json()
+
+    if isinstance(json_res, dict) and 'data' in json_res:
+        list_users = json_res['data']
+    elif isinstance(json_res, list):
+        list_users = json_res
+    else:
+        list_users = []
+
+    if not list_users:
+        return InTouchUserSearchModel(
+            success=False,
+            found=False,
+            error="User not found."
+        )
+
+    raw_user = list_users[0]
+    status = raw_user.get('status')
+    first_name = raw_user.get('firstName', '')
+    last_name = raw_user.get('lastName', '')
+    full_name = f"{first_name} {last_name}".strip()
+
+    return InTouchUserSearchModel(
+        success=True,
+        found=True,
+        id_system=raw_user.get('id'),
+        name=full_name,
+        email=raw_user.get('profile', {}).get('workemail'),
+        role=raw_user.get('position'),
+        current_status=status,
+        is_active=status in ACTIVE_STATUSES,
+        registration=registration,
+    )
+
+
+async def activate_user_intouch(registration: str) -> InTouchActivateUserModel:
+
+    logger.info(f"Activating InTouch user: {registration}")
+
+    if err := _validate_config():
+        return InTouchActivateUserModel(error=str(err))
+
+    data = search_user(registration)
+    if not data or not data.success:
+        return InTouchActivateUserModel(success=False, error="User not found.")
+
+    user_id = data.id_system
+    name = data.name
+    status = data.current_status
+
+    if status in ACTIVE_STATUSES:
+        return InTouchActivateUserModel(
+            success=True,
+            action="none",
+            message=f"{name} is already active"
+    )
+
+    if status != "deactivated":
+        return InTouchActivateUserModel(
+            success=False,
+            error=f"Status '{status}' does not allow automatic reactivation"
+        )
+
+    url_update = f"{settings.INTOUCH_URL}/{user_id}"
+    payload = {"status": "activated"}
+    headers_update = {
+        "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
+        "Content-Type": (
+            "application/vnd.staffbase.accessors.user-update.v1+json"
+        )
+    }
+
+    try:
+        resp = requests.put(
+            url_update,
+            json=payload,
+            headers=headers_update,
+            timeout=10
+        )
+
+        if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
+            return InTouchActivateUserModel(
+                success=True,
+                message=f"User {name} was successfully renewed.",
+                action="Activation"
+            )
+        return InTouchActivateUserModel(
+            success=False,
+            error=(
+            "Error in the Staffbase API when activating: "
+            f"{resp.text}"
+            )
+        )
+    except Exception as e:
+        return InTouchActivateUserModel(
+            success=False,
+            error=f"Connection error: {str(e)}"
+        )
+
+
+async def deactivate_user_intouch(registration: str) -> InTouchDeactivateUserModel:
+
+    logger.info(f"Deactivating InTouch user: {registration}")
+
+    if err := _validate_config():
+        return InTouchDeactivateUserModel(error=str(err))
+
+    data = search_user(registration)
+    if not data or not data.success:
+        return InTouchDeactivateUserModel(success=False, error="User not found.")
+
+    user_id = data.id_system
+    name = data.name
+    status = data.current_status
+
+    logger.info(f" Current status: '{status}'")
+
+    try:
+        if status in DEACTIVE_STATUSES:
+            logger.info(" Active user. Changing status to DEACTIVATED.")
+
+            url_update = f"{settings.INTOUCH_URL}/{user_id}"
+            payload = {"status": "deactivated"}
+            headers_update = {
+                "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
+                "Content-Type": (
+                    "application/vnd.staffbase.accessors.user-update.v1+json"
+                )
             }
 
-        json_res = response.json()
+            resp = requests.put(
+                url_update,
+                json=payload,
+                headers=headers_update,
+                timeout=10
+            )
+            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
+                return InTouchDeactivateUserModel(
+                    success=True,
+                    action="deactivated",
+                    message=f"User {name} was successfully deactivated.",
+                )
+            return InTouchDeactivateUserModel(
+                        success=False,
+                        error=f"Error during deactivation: {resp.text}"
+            )
+        if status in DELETABLE_STATUSES:
+            resp = requests.delete(
+                f"{settings.INTOUCH_URL}/{user_id}",
+                headers=_get_headers(),
+                timeout=10,
+            )
+            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
+                return InTouchDeactivateUserModel(
+                    success=True,
+                    action="deleted",
+                    message=f"Invitation for {name} deleted"
+                )
+            return InTouchDeactivateUserModel(
+                success=False,
+                error=f"Deletion error: {resp.text}"
+            )
 
-        if isinstance(json_res, dict) and 'data' in json_res:
-            list_users = json_res['data']
-        elif isinstance(json_res, list):
-            list_users = json_res
-        else:
-            list_users = []
+        if status in PROTECTED_STATUSES:
+            return InTouchDeactivateUserModel(
+                success=True,
+                action="skipped",
+                message=f"{name} is '{status}' - no action needed",
+            )
 
-        if not list_users:
-            return {"success": False, "erro": "User not found."}
+        return InTouchDeactivateUserModel(
+            success=False,
+            error=f"Unknown: '{status}' - operation canceled for safety",
+        )
 
-        raw_user = list_users[0]
-        first_name = raw_user.get('firstName', '')
-        surname = raw_user.get('lastName', '')
-        full_name = f"{first_name} {surname}".strip()
-
-        status_intouch = raw_user.get('status')
-
-        if status_intouch == 'activated':
-            services_list_view.append("Intouch")
-            services_list_view.append("Acesso")
-            services_list_view.append("Rede")
-
-        return {
-            "success": True,
-            "found": True,
-            "id_system": raw_user.get('id'),
-            "name": full_name,
-            "email": raw_user.get('profile', {}).get('workemail'),
-            "role": raw_user.get('position'),
-            "current_status": status_intouch,
-            "registration": registration,
-            "services": services_list_view
-        }
+    except requests.RequestException as e:
+        return InTouchDeactivateUserModel(
+            success=False,
+            error=f"Connection error: {str(e)}"
+        )
 
     except Exception as e:
-        return {"erro": str(e), "success": False}
-
-
-async def activate_user_intouch(registration: str):
-
-    print(f"Starting the enrollment process: {registration}")
-    data = search_user(registration)
-
-    if not data or not data.get('success'):
-        return {"success": False, "error": "User not found."}
-
-    user_id = data['id_system']
-    name = data['name']
-    current_status = data['current_status']
-
-    print(f" Current_status: '{current_status}'")
-
-    if current_status == 'deactivated':
-        print(f" User deactivated. Changing status of {name} to activated.")
-
-        url_update = f"{settings.INTOUCH_URL}/{user_id}"
-        payload = {"status": "activated"}
-        headers_update = {
-            "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
-            "Content-Type": (
-                "application/vnd.staffbase.accessors.user-update.v1+json"
-            )
-        }
-
-        try:
-            resp = requests.put(
-                url_update,
-                json=payload,
-                headers=headers_update
-            )
-
-            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
-                return {
-                    "success": True,
-                    "message": f"User {name} was successfully renewed.",
-                    "action": "Activation"
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": (
-                        "Error in the Staffbase API when activating: "
-                        f"{resp.text}"
-                    )
-                }
-        except Exception as e:
-            return {"success": False, "error": f"Connection error: {str(e)}"}
-
-    elif current_status == 'activated':
-        return {
-            "success": True,
-            "message": f"User {name}: The user is already active.",
-            "action": "none"
-        }
-
-    else:
-        return {
-            "success": False,
-            "error": (
-                f"Status '{current_status}' does "
-                "not allow automatic reactivation."
-            )
-        }
-
-
-async def deactivate_user_intouch(registration: str):
-
-    print(f" Starting the enrollment process: {registration}")
-
-    data = search_user(registration)
-
-    if not data or not data.get('success'):
-        return {"success": False, "error": "User not found."}
-
-    user_id = data['id_system']
-    name = data['name']
-    current_status = data['current_status']
-
-    print(f" Current status: '{current_status}'")
-
-    if current_status == 'activated':
-        print(" Active user. Changing status to DEACTIVATED.")
-
-        url_update = f"{settings.INTOUCH_URL}/{user_id}"
-        payload = {"status": "deactivated"}
-        headers_update = {
-            "Authorization": f"Basic {settings.INTOUCH_TOKEN}",
-            "Content-Type": (
-                "application/vnd.staffbase.accessors.user-update.v1+json"
-            )
-        }
-
-        try:
-            resp = requests.put(
-                url_update,
-                json=payload,
-                headers=headers_update
-            )
-            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
-                return {
-                    "success": True,
-                    "message": f"User {name} was successfully DEACTIVATED.",
-                    "action": "disable"
-                }
-            else:
-                return {
-                        "success": False,
-                        "error": f"Error during deactivation: {resp.text}"
-                    }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-
-    elif current_status in {'pending', 'created', 'invited'}:
-        print(" Pending/Created user. Executing definitive DELETION.")
-
-        url_delete = f"{settings.INTOUCH_URL}/{user_id}"
-
-        try:
-            resp = requests.delete(url_delete, headers=HEADERS)
-            if resp.status_code in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
-                return {
-                    "success": True,
-                    "message": (
-                        f"User invitation {name} was successfully DELETED."
-                    ),
-                    "action": "delete"
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": f"Error during deletion: {resp.text}"
-                }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-
-    elif current_status in {'contact', 'deactivated'}:
-        print(
-            f" Status '{current_status}' is protected"
-            " or already processed. No action taken."
-        )
-        return {
-            "success": True,
-            "message": (
-                f"User {name} is set as '{current_status}' "
-                "and does not need to be changed."
-            ),
-            "action": "nothing"
-        }
-
-    else:
-        return {
-            "success": False,
-            "error": (
-                f"Unknown status ('{current_status}'). "
-                "Operation canceled for safety."
-            )
-        }
+        return InTouchDeactivateUserModel(success=False, error=str(e))

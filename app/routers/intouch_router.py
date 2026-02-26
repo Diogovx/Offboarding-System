@@ -57,10 +57,10 @@ async def activate_user_intouch(
 ):
     res_intouch = await intouch_service.activate_user_intouch(registration)
 
-    if not res_intouch.get("success"):
+    if not res_intouch.success:
         raise HTTPException(
             status_code=400,
-            detail=res_intouch.get("error", "Error while activating user")
+            detail=res_intouch.error
         )
 
     action = EmailActions.get_by_id(2)

@@ -5,9 +5,8 @@ from app.security import Current_user, Admin_user
 from app.services import (
     execute_offboarding,
     get_offboarding_history,
-    ADService,
     ADServiceDep,
-    search_user
+    verify_services_before_disabling
 )
 
 router = APIRouter(prefix="/offboarding", tags=["offboarding"])
@@ -17,19 +16,9 @@ router = APIRouter(prefix="/offboarding", tags=["offboarding"])
 async def search_services(
     registration: str,
     current_user: Current_user
-):
-    service_list: set[str] = set()
+) -> dict[str, bool]:
 
-    ad_service = ADService()
-
-    ad_req = ad_service.search_users(registration=registration)
-    if ad_req:
-        service_list.add("Rede")
-    intouch_req = search_user(registration=registration)
-    if intouch_req:
-        service_list.add("InTouch")
-
-    return service_list
+    return await verify_services_before_disabling(registration)
 
 
 @router.post("/execute/{registration}")
