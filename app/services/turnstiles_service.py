@@ -1,7 +1,7 @@
 
 import requests
 
-from app.security import settings
+from app.config import settings
 
 TURNSTILES = [
     {

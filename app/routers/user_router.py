@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
 
+from app.database import Db_session
 from app.enums import AuditAction, AuditStatus
 from app.models import User
 from app.schemas import (
@@ -17,12 +18,11 @@ from app.schemas import (
 )
 from app.security import (
     Current_user,
-    Db_session,
     Editor_user,
     Token,
     get_password_hash,
 )
-from app.security.security import settings
+from app.config import settings
 from app.services import create_audit_log
 
 router = APIRouter(prefix="/users", tags=["Users"])
