@@ -28,8 +28,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8000"],
-    # quando colocar no Docker, temos que alterar
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,4 +43,4 @@ app.include_router(intouch_router.router)
 app.include_router(offboarding_router.router)
 
 app.mount("/app", StaticFiles(directory="app"), name="app")
-app.mount("/static", StaticFiles(directory="pages"), name="pages")
+app.mount("/pages", StaticFiles(directory="pages"), name="pages")
