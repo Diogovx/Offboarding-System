@@ -102,7 +102,6 @@ createApp({
             return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
         };
 
-        // Exportação assíncrona: inicia job e faz polling até o arquivo ficar pronto
         const exportLogs = async (format) => {
             exporting.value = true;
             exportMsg.value = 'Preparando exportação...';

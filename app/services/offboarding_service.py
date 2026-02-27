@@ -9,7 +9,7 @@ from app.models import (
     OffboardingRecord,
     RevokedAccess,
 )
-from app.schemas import AuditLogCreate, OffboardingContext, InTouchUserSearchModel
+from app.schemas import AuditLogCreate, OffboardingContext
 from app.services import (
     email_service,
     intouch_service,
@@ -112,12 +112,14 @@ async def verify_services_before_disabling(
 
 
 def _audit(
+    *,
     session,
     action,
     status,
     message,
     current_user,
     registration,
+    target_username,
     req
 ):
     create_audit_log(
@@ -128,6 +130,8 @@ def _audit(
             message=message,
             user_id=current_user.id,
             username=current_user.username,
+            target_username=target_username,
+            target_registration=registration,
             resource=registration,
             ip_address=req.client.host if req.client else None,
             user_agent=req.headers.get("user-agent"),
@@ -144,6 +148,7 @@ async def execute_offboarding(
     session: Db_session
 ):
     target_user = intouch_service.search_user(registration)
+    print(target_user.name)
 
     if not target_user:
         logger.error(
@@ -166,23 +171,25 @@ async def execute_offboarding(
                 successfully_revoked.append("Acesso")
 
                 _audit(
-                    session,
-                    AuditAction.DISABLE_TURNSTILE_USER,
-                    AuditStatus.SUCCESS,
-                    f"User {registration} blocked in all turnstiles.",
-                    current_user,
-                    registration,
-                    req
+                    session=session,
+                    action=AuditAction.DISABLE_TURNSTILE_USER,
+                    status=AuditStatus.SUCCESS,
+                    message=f"User {registration} blocked in all turnstiles.",
+                    current_user=current_user,
+                    target_username=target_user.name,
+                    registration=registration,
+                    req=req
                 )
         except Exception as e:
             _audit(
-                session,
-                AuditAction.DISABLE_TURNSTILE_USER,
-                AuditStatus.FAILED,
-                f"Turnstile deactivation failed: {e}",
-                current_user,
-                registration,
-                req
+                session=session,
+                action=AuditAction.DISABLE_TURNSTILE_USER,
+                status=AuditStatus.FAILED,
+                message=f"Turnstile deactivation failed: {e}",
+                current_user=current_user,
+                target_username=target_user.name,
+                registration=registration,
+                req=req
             )
 
     if services_map.get("InTouch") is True:
@@ -191,34 +198,37 @@ async def execute_offboarding(
             if res.success:
                 successfully_revoked.append("InTouch")
                 _audit(
-                    session,
-                    AuditAction.DISABLE_INTOUCH_USER,
-                    AuditStatus.SUCCESS,
-                    f"InTouch: {res.message}",
-                    current_user,
-                    registration,
-                    req
+                    session=session,
+                    action=AuditAction.DISABLE_INTOUCH_USER,
+                    status=AuditStatus.SUCCESS,
+                    message=f"InTouch: {res.message}",
+                    current_user=current_user,
+                    target_username=target_user.name,
+                    registration=registration,
+                    req=req
                 )
             else:
                 _audit(
-                    session,
-                    AuditAction.DISABLE_INTOUCH_USER,
-                    AuditStatus.FAILED,
-                    f"InTouch: {res.error}",
-                    current_user,
-                    registration,
-                    req
+                    session=session,
+                    action=AuditAction.DISABLE_INTOUCH_USER,
+                    status=AuditStatus.FAILED,
+                    message=f"InTouch: {res.error}",
+                    current_user=current_user,
+                    target_username=target_user.name,
+                    registration=registration,
+                    req=req
                 )
         except Exception as e:
             logger.error(f"InTouch error for {registration}: {e}")
             _audit(
-                session,
-                AuditAction.DISABLE_INTOUCH_USER,
-                AuditStatus.FAILED,
-                f"InTouch deactivation failed: {e}",
-                current_user,
-                registration,
-                req
+                session=session,
+                action=AuditAction.DISABLE_INTOUCH_USER,
+                status=AuditStatus.FAILED,
+                message=f"InTouch deactivation failed: {e}",
+                current_user=current_user,
+                target_username=target_user.name,
+                registration=registration,
+                req=req
             )
 
     if services_map.get("Rede") is True:
@@ -231,13 +241,14 @@ async def execute_offboarding(
             if res_ad.action == "disabled":
                 successfully_revoked.append("Rede")
                 _audit(
-                    session,
-                    AuditAction.DISABLE_AD_USER,
-                    AuditStatus.SUCCESS,
-                    f"User {registration} deactivated from AD.",
-                    current_user,
-                    registration,
-                    req
+                    session=session,
+                    action=AuditAction.DISABLE_AD_USER,
+                    status=AuditStatus.SUCCESS,
+                    message=f"User {registration} deactivated from AD.",
+                    current_user=current_user,
+                    target_username=target_user.name,
+                    registration=registration,
+                    req=req
                 )
             elif res_ad.action == "already_disabled":
                 successfully_revoked.append("Rede")
@@ -249,13 +260,14 @@ async def execute_offboarding(
         except Exception as e:
             logger.error(f"AD error for {registration}: {e}")
             _audit(
-                session,
-                AuditAction.DISABLE_AD_USER,
-                AuditStatus.FAILED,
-                f"AD deactivation failed: {e}",
-                current_user,
-                registration,
-                req
+                session=session,
+                action=AuditAction.DISABLE_AD_USER,
+                status=AuditStatus.FAILED,
+                message=f"AD deactivation failed: {e}",
+                current_user=current_user,
+                target_username=target_user.name,
+                registration=registration,
+                req=req
             )
 
     if successfully_revoked:
