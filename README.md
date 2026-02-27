@@ -33,6 +33,7 @@ The application follows a layered architecture model with separation of responsi
 
 ### Simplified Diagram
 
+```markdown
 Client (Browser)
     ↓
 REST API (FastAPI)
@@ -44,6 +45,7 @@ Service Layer
 ├── Gmail Integration
 ├── ControlID integration
 └── SQLite (Audit) Logs
+```
 
 ---
 
