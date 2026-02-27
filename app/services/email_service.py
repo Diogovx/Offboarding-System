@@ -5,9 +5,7 @@ from email.message import EmailMessage
 from zoneinfo import ZoneInfo
 
 from app.enums import EmailActions
-from app.security import Settings
-
-settings = Settings()
+from app.config import settings
 
 
 async def send_email(

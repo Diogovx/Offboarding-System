@@ -8,6 +8,7 @@
     <script src="../app/assets/js/libs/tailwind.js"></script>
     <script src="../app/assets/js/libs/vue.global.js"></script>
     <script src="../app/assets/js/libs/axios.min.js"></script>
+    <link rel="shortcut icon" href="../app/assets/img/favicon.png" type="image/x-icon">
 
     <style type="text/tailwindcss">
       @theme {
@@ -26,7 +27,7 @@
             <div class="px-4 py-3 flex items-center justify-between">
                 <!-- Logo + links desktop -->
                 <div class="flex items-center gap-6">
-                    <span class="font-bold text-lg tracking-wide">Cladtek</span>
+                    <span class="font-bold text-lg tracking-wide"><img src="../app/assets/img/logo.png" alt="logo"></span>
                     <div class="hidden sm:flex items-center gap-4 text-sm">
                         <a href="offboarding.html"
                             class="text-white/80 hover:text-white transition-colors"
@@ -82,6 +83,14 @@
                 <p v-if="searchMessage" class="mt-2 text-sm" :class="searchStatusClass">{{ searchMessage }}</p>
             </div>
 
+            <div v-if="isLoading" class="bg-white rounded-xl shadow-md border border-gray-200 p-6 mt-6 animate-pulse">
+                <div class="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div class="space-y-2">
+                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                </div>
+            </div>
+
             <div v-if="foundUser && foundUser.id_system" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden mt-6 fade-in">
                 <div class="p-6">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
@@ -90,25 +99,69 @@
                             <br>
                             <p class="text-xl text-gray-500 font-mono">Matrícula: {{ foundUser.registration }}</p>
                             <p class="text-xl text-gray-500 font-mono">Departamento: {{ foundUser.role}} </p>
-                            <p class="text-xl text-gray-500 font-mono">Status: {{foundUser.current_status}}</p>
-                            <p class="text-xl text-gray-500 font-mono">Email: {{foundUser.email}}</p>
-
+                            <p class="text-xl text-gray-500 font-mono">Status: {{ foundUser.current_status }}</p>
+                            <p class="text-xl text-gray-500 font-mono">Email: {{ foundUser.email }}</p>
                         </div>
-                        <button @click="showConfirmModal = true" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg font-bold hover:bg-red-600 hover:text-white transition-all cursor-pointer">
-                            Offboarding
+                        
+                        <button 
+                            @click="showConfirmModal = true" 
+                            :disabled="isOffboarded"
+                            class="shrink-0 border px-4 py-2 rounded-lg font-bold transition-all text-sm"
+                            :class="isOffboarded 
+                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                                : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-600 hover:text-white cursor-pointer'">
+                            {{ isOffboarded ? 'Desativado' : 'Offboarding' }}
                         </button>
                     </div>
 
-                    <div class="mt-2">
-                        <p class="text-[13px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sistemas identificados</p>
-                        <div class="flex flex-wrap gap-2">
-                            <template v-if="listServices && listServices.length > 0">
-                                <span v-for="service in listServices" :key="service" class="px-6 py-1 bg-cladtek/10 text-cladtek text-1x1 font-bold rounded-full border border-cladtek/20">
-                                    {{ service }}
+                    <div class="mt-6">
+                        <template v-if="isOffboarded">
+                            <div class="flex items-center gap-2 mb-3">
+                                <p class="text-[13px] font-bold text-red-500 uppercase tracking-widest">
+                                    ⚠ Serviços desativados
+                                    <span v-if="lastOffboarding" >
+                                        (em {{ new Date(lastOffboarding.offboarded_at).toLocaleDateString('pt-BR') }} 
+                                        por {{ lastOffboarding.performed_by }})
+                                    </span>
+                                    <span v-else >
+                                        (Status atual: {{ foundUser.current_status }})
+                                    </span>
+                                </div>
+                                </p>
+                                
+        
+                            <div class="flex flex-wrap gap-2">
+                                <template v-if="displayServices && displayServices.length > 0">
+                                    <span v-for="service in displayServices" :key="service.name" 
+                                          class="px-4 py-1 text-sm font-bold rounded-full border transition-colors"
+                                          :class="service.active
+                                          ? 'bg-cladtek/10 text-cladtek border-cladtek/20'
+                                          : 'bg-red-50 text-red-600 border-red-200'">
+                                        {{ service.name }}
+                                    </span>
+                                </template>
+                                <span v-else class="text-sm text-gray-400 italic font-light">
+                                    Nenhum sistema registrado.
                                 </span>
-                            </template>
-                            <span v-else class="text-sm text-gray-400 italic font-light">Nenhum sistema identificado </span>
-                        </div>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <p class="text-[13px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                                Sistemas identificados
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <template v-if="displayServices && displayServices.length > 0">
+                                    <span v-for="service in displayServices" :key="service.name" 
+                                          class="px-6 py-1 bg-cladtek/10 text-cladtek text-sm font-bold rounded-full border border-cladtek/20">
+                                        {{ service.name }}
+                                    </span>
+                                </template>
+                                <span v-else class="text-sm text-gray-400 italic font-light">
+                                    Nenhum sistema identificado.
+                                </span>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -117,6 +170,8 @@
                 <p class="font-medium">{{ actionMessage }}</p>
             </div>
         </main>
+
+        <!--Confirm Modal-->
 
         <div v-if="showConfirmModal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
@@ -137,7 +192,10 @@
                                     <div class="mt-2">
                                         <p class="text-sm text-gray-500">
                                             Tem certeza que deseja desativar o usuário <strong>{{ foundUser?.name }} ({{foundUser?.registration}})</strong>? 
-                                            Acesso a serem desativados: <span class="text-cladtek-dark font-semibold">{{ listServices.join(', ') }}</span>. 
+                                            Acesso a serem desativados: 
+                                            <span class="text-cladtek-dark font-semibold">
+                                                {{ servicesToDeactivateString || 'Nenhum sistema ativo detectado' }}
+                                            </span>. 
                                             Essa ação não poderá ser desfeita.
                                         </p>
                                     </div>

@@ -1,6 +1,6 @@
 from ldap3 import ALL, SIMPLE, Connection, Server  # type: ignore
 
-from app.security.security import settings
+from app.config import settings
 
 
 def get_ldap_connection() -> Connection:
