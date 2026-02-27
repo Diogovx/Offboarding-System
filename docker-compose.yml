@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  offboarding:
+    build: .
+    image: cladtek/offboarding:latest
+    container_name: offboarding_app
+    ports:
+      - "80:8000"
+    environment:
+      - ALGORITHM=HS256
+      - EMAIL_SENDER=diogo.xavier@cladtek.com
+      - PORT=587
+      - EMAIL_RECEIVER=diogo.xavier@cladtek.com
+      - SMTP_SERVER="smtp.gmail.com"
+    secrets:
+      - database_url
+      - secret_key
+      - intouch_token
+      - intouch_url
+      - email_password
+      - ad_username
+      - ad_password
+      - ad_server
+      - ad_domain
+      - ad_base_dn
+      - disabled_ou
+      - turnstile_a_url
+      - turnstile_b_url
+      - turnstile_a_session
+      - turnstile_b_session
+    volumes:
+      - offboarding_data:/app/data
+    restart: always
+
+secrets:
+  database_url:
+    external: true
+  secret_key:
+    external: true
+  intouch_url:
+    external: true
+  email_password:
+    external: true
+  ad_username:
+    external: true
+  ad_password:
+    external: true
+  ad_server:
+    external: true
+  ad_domain:
+    external: true
+  ad_base_dn:
+    external: true
+  disabled_ou:
+    external: true
+  turnstile_a_url:
+    external: true
+  turnstile_b_url:
+    external: true
+  turnstile_a_session:
+    external: true
+  turnstile_b_session:
+    external: true
+
+volumes:
+  offboarding_data:

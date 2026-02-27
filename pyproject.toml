@@ -1,7 +1,7 @@
 [project]
-name = "dismissal-assistant"
+name = "offboarding"
 version = "0.1.0"
-description = "Add your description here"
+description = "platform for disabling users from access control systems"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
