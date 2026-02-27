@@ -28,54 +28,67 @@
         </div>
     </div>
 
-    <div id="app" class="relative z-10 flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <div id="app" class="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 lg:px-8">
+    <div class="w-full max-w-md bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-gray-100 fade-in">
         
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
             <div class="text-center">
-                 <div class="mx-auto h-16 w-40 bg-cladtek rounded-full mb-6 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                    Offboarding
+                <div class="mx-auto h-14 w-14 bg-cladtek rounded-xl mb-4 flex items-center justify-center text-white shadow-lg rotate-0 hover:rotate-3 transition-transform">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </div>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900">Acesse sua conta</h2>
+                <p class="text-sm text-gray-500 mt-1">Plataforma de Offboarding Cladtek</p>
             </div>
-            
         </div>
 
-        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form class="space-y-6" @submit.prevent="signup">
+        <div class="mt-8">
+            <div v-if="errorMessage" class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                {{ errorMessage }}
+            </div>
+
+            <form class="space-y-5" @submit.prevent="signup">
                 <div>
-                    <label for="username" class="block text-sm/6 font-medium text-gray-700">Usuário</label>
-                    <div class="mt-2">
-                        <input v-model="username" type="text" id="username" required 
-                               class="block w-full rounded-md border-2 border-cladtek bg-white px-3 py-1.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-cladtek/40 sm:text-sm/6 transition-all" />
-                    </div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Usuário</label>
+                    <input v-model="username" type="text" required 
+                           class="block w-full rounded-xl border-2 border-gray-100 bg-gray-50/50 px-4 py-2.5 text-gray-900 focus:outline-none focus:border-cladtek focus:bg-white transition-all" 
+                           placeholder="Ex: nome.sobrenome"/>
                 </div>
 
                 <div>
-                    <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm/6 font-medium text-gray-700">Senha</label>
-                        <div class="text-sm">
-                            <a href="#" class="font-semibold text-cladtek hover:text-cladtek-dark"> <a href="https://helpdesk.cladtek.com/" class="font-semibold text-cladtek hover:underline">Esqueceu a senha?</a></a>
-                        </div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Senha</label>
+                    <div class="relative">
+                        <input v-model="password" :type="showPassword ? 'text' : 'password'" required 
+                               class="block w-full rounded-xl border-2 border-gray-100 bg-gray-50/50 px-4 py-2.5 text-gray-900 focus:outline-none focus:border-cladtek focus:bg-white transition-all" 
+                               placeholder="••••••••"/>
+                        <button type="button" @click="showPassword = !showPassword" 
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cladtek transition-colors cursor-pointer">
+                            <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2"/></svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88L4.22 4.22m13.9 13.9L12.46 12.46M21.543 12A9.97 9.97 0 0012 5c-.783 0-1.537.09-2.265.259M21 21l-6.75-6.75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
                     </div>
-                    <div class="mt-2">
-                        <input v-model="password" type="password" id="password" required 
-                               class="block w-full rounded-md border-2 border-cladtek bg-white px-3 py-1.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-cladtek/40 sm:text-sm/6 transition-all" />
+                    <div class="text-right mt-2">
+                        <a href="https://helpdesk.cladtek.com/" class="text-xs font-semibold text-cladtek hover:text-cladtek-dark transition-colors">Esqueceu a senha?</a>
                     </div>
                 </div>
 
-                <div>
-                    <button type="submit" 
-                            class="flex w-full justify-center rounded-md bg-cladtek px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-cladtek-dark transition-all cursor-pointer">
-                        Entrar
-                    </button>
-                </div>
+                <button type="submit" :disabled="isLoading"
+                        class="flex w-full justify-center rounded-xl bg-cladtek px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-cladtek-dark hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-wait cursor-pointer">
+                    <span v-if="!isLoading">Entrar na plataforma</span>
+                    <span v-else class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        Autenticando...
+                    </span>
+                </button>
             </form>
 
-            <p class="mt-10 text-center text-sm/6 text-gray-500">
-                Não possui acesso?
-                <a href="https://helpdesk.cladtek.com/" class="font-semibold text-cladtek hover:underline">Acione o time de TI!</a>
+            <p class="mt-8 text-center text-xs text-gray-400 font-medium uppercase tracking-widest">
+                Suporte Técnico
+                <a href="https://helpdesk.cladtek.com/" class="block mt-2 text-sm lowercase tracking-normal font-bold text-cladtek hover:underline">helpdesk.cladtek.com</a>
             </p>
         </div>
     </div>
+</div>
     </div>
     <script src="../app/assets/js/script.js"></script>
 </body>
