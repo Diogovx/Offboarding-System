@@ -8,6 +8,8 @@ def audit_log_to_dict(log: AuditLog) -> dict:
         "status": log.status,
         "username": log.username,
         "user_id": str(log.user_id) if log.user_id else None,
+        "target_username": log.target_username,
+        "target_registration": log.target_registration,
         "resource": log.resource,
         "message": log.message,
         "ip_address": log.ip_address,
