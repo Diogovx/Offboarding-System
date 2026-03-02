@@ -6,7 +6,7 @@ services:
     image: cladtek/offboarding:latest
     container_name: offboarding_app
     ports:
-      - "80:8000"
+      - "8086:8080"
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - ALGORITHM=${ALGORITHM}
