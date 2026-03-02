@@ -8,60 +8,29 @@ services:
     ports:
       - "80:8000"
     environment:
-      - DATABASE_URL="sqlite:///offboarding_db.db"
-      - ALGORITHM=HS256
-      - EMAIL_SENDER=diogo.xavier@cladtek.com
-      - PORT=587
-      - EMAIL_RECEIVER=diogo.xavier@cladtek.com
-      - SMTP_SERVER="smtp.gmail.com"
-    secrets:
-      - SECRET_KEY
-      - INTOUCH_TOKEN
-      - INTOUCH_URL
-      - EMAIL_PASSWORD
-      - AD_USERNAME
-      - AD_PASSWORD
-      - AD_SERVER
-      - AD_DOMAIN
-      - AD_BASE_DN
-      - DISABLED_OU
-      - TURNSTILE_A_URL
-      - TURNSTILE_B_URL
-      - TURNSTILE_A_SESSION
-      - TURNSTILE_B_SESSION
+      - DATABASE_URL=${DATABASE_URL}
+      - ALGORITHM=${ALGORITHM}
+      - EMAIL_SENDER=${EMAIL_SENDER}
+      - PORT=${PORT}
+      - EMAIL_RECEIVER=${EMAIL_RECEIVER}
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SECRET_KEY=${SECRET_KEY}
+      - INTOUCH_TOKEN=${INTOUCH_TOKEN}
+      - INTOUCH_URL=${INTOUCH_URL}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - AD_USERNAME=${AD_USERNAME}
+      - AD_PASSWORD=${AD_PASSWORD}
+      - AD_SERVER=${AD_SERVER}
+      - AD_DOMAIN=${AD_DOMAIN}
+      - AD_BASE_DN=${AD_BASE_DN}
+      - DISABLED_OU=${DISABLED_OU}
+      - TURNSTILE_A_URL=${TURNSTILE_A_URL}
+      - TURNSTILE_B_URL=${TURNSTILE_B_URL}
+      - TURNSTILE_A_SESSION=${TURNSTILE_A_SESSION}
+      - TURNSTILE_B_SESSION=${TURNSTILE_B_SESSION}
     volumes:
       - offboarding_data:/app/data
     restart: always
-
-secrets:
-  SECRET_KEY:
-    external: true
-  INTOUCH_TOKEN:
-    external: true
-  INTOUCH_URL:
-    external: true
-  EMAIL_PASSWORD:
-    external: true
-  AD_USERNAME:
-    external: true
-  AD_PASSWORD:
-    external: true
-  AD_SERVER:
-    external: true
-  AD_DOMAIN:
-    external: true
-  AD_BASE_DN:
-    external: true
-  DISABLED_OU:
-    external: true
-  TURNSTILE_A_URL:
-    external: true
-  TURNSTILE_B_URL:
-    external: true
-  TURNSTILE_A_SESSION:
-    external: true
-  TURNSTILE_B_SESSION:
-    external: true
 
 volumes:
   offboarding_data:
