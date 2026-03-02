@@ -8,13 +8,13 @@ services:
     ports:
       - "80:8000"
     environment:
+      - DATABASE_URL="sqlite:///offboarding_db.db"
       - ALGORITHM=HS256
       - EMAIL_SENDER=diogo.xavier@cladtek.com
       - PORT=587
       - EMAIL_RECEIVER=diogo.xavier@cladtek.com
       - SMTP_SERVER="smtp.gmail.com"
     secrets:
-      - DATABASE_URL
       - SECRET_KEY
       - INTOUCH_TOKEN
       - INTOUCH_URL
@@ -34,8 +34,6 @@ services:
     restart: always
 
 secrets:
-  DATABASE_URL:
-    external: true
   SECRET_KEY:
     external: true
   INTOUCH_TOKEN:
