@@ -247,7 +247,7 @@ These can be defined directly in the docker-compose.yml or via the Portainer env
 | EMAIL_SENDER | Email address that sends notifications | <alerts@cladtek.com> |
 | EMAIL_RECEIVER | Default recipient for audit alerts | <admin@cladtek.com> |
 | SMTP_SERVER | SMTP Relay/Server address | smtp.gmail.com |
-| PORT | SMTP port (usually 587 for TLS) | 587 |
+| AD_PORT | SMTP port (usually 587 for TLS) | 587 |
 
 ### 9.2 Docker Secrets (Sensitive Data)
 

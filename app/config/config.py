@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str = ""
     EMAIL_RECEIVER: str = ""
     SMTP_SERVER: str = ""
-    PORT: int = 587
+    AD_PORT: int = 587
     AD_USERNAME: str = "username_here"
     AD_PASSWORD: str = "password_here"
     AD_SERVER: str = ""

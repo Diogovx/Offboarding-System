@@ -43,7 +43,7 @@ async def send_email(
     context = ssl.create_default_context()
     with smtplib.SMTP(
         settings.SMTP_SERVER,
-        settings.PORT,
+        settings.AD_PORT,
         timeout=10
     ) as server:
         server.starttls(context=context)

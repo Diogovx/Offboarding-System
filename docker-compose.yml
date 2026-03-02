@@ -6,12 +6,12 @@ services:
     image: cladtek/offboarding:latest
     container_name: offboarding_app
     ports:
-      - "8086:8080"
+      - "8086:8000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - ALGORITHM=${ALGORITHM}
       - EMAIL_SENDER=${EMAIL_SENDER}
-      - PORT=${PORT}
+      - AD_PORT=${PORT}
       - EMAIL_RECEIVER=${EMAIL_RECEIVER}
       - SMTP_SERVER=${SMTP_SERVER}
       - SECRET_KEY=${SECRET_KEY}
