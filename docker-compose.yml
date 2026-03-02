@@ -14,55 +14,55 @@ services:
       - EMAIL_RECEIVER=diogo.xavier@cladtek.com
       - SMTP_SERVER="smtp.gmail.com"
     secrets:
-      - database_url
-      - secret_key
-      - intouch_token
-      - intouch_url
-      - email_password
-      - ad_username
-      - ad_password
-      - ad_server
-      - ad_domain
-      - ad_base_dn
-      - disabled_ou
-      - turnstile_a_url
-      - turnstile_b_url
-      - turnstile_a_session
-      - turnstile_b_session
+      - DATABASE_URL
+      - SECRET_KEY
+      - INTOUCH_TOKEN
+      - INTOUCH_URL
+      - EMAIL_PASSWORD
+      - AD_USERNAME
+      - AD_PASSWORD
+      - AD_SERVER
+      - AD_DOMAIN
+      - AD_BASE_DN
+      - DISABLED_OU
+      - TURNSTILE_A_URL
+      - TURNSTILE_B_URL
+      - TURNSTILE_A_SESSION
+      - TURNSTILE_B_SESSION
     volumes:
       - offboarding_data:/app/data
     restart: always
 
 secrets:
-  database_url:
+  DATABASE_URL:
     external: true
-  secret_key:
+  SECRET_KEY:
     external: true
-  intouch_token:
+  INTOUCH_TOKEN:
     external: true
-  intouch_url:
+  iINTOUCH_URL:
     external: true
-  email_password:
+  EMAIL_PASSWORD:
     external: true
-  ad_username:
+  AD_USERNAME:
     external: true
-  ad_password:
+  AD_PASSWORD:
     external: true
-  ad_server:
+  AD_SERVER:
     external: true
-  ad_domain:
+  AD_DOMAIN:
     external: true
-  ad_base_dn:
+  AD_BASE_DN:
     external: true
-  disabled_ou:
+  DISABLED_OU:
     external: true
-  turnstile_a_url:
+  TURNSTILE_A_URL:
     external: true
-  turnstile_b_url:
+  TURNSTILE_B_URL:
     external: true
-  turnstile_a_session:
+  TURNSTILE_A_SESSION:
     external: true
-  turnstile_b_session:
+  TURNSTILE_B_SESSION:
     external: true
 
 volumes:
