@@ -40,7 +40,7 @@ secrets:
     external: true
   INTOUCH_TOKEN:
     external: true
-  iINTOUCH_URL:
+  INTOUCH_URL:
     external: true
   EMAIL_PASSWORD:
     external: true
