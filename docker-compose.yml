@@ -38,6 +38,8 @@ secrets:
     external: true
   secret_key:
     external: true
+  intouch_token:
+    external: true
   intouch_url:
     external: true
   email_password:
