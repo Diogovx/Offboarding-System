@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, Request, Query
 
 from app.database import Db_session
-from app.security import Current_user, Admin_user
+from app.security import Current_user
 from app.services import (
     execute_offboarding,
     get_offboarding_history,
@@ -46,7 +46,7 @@ async def execute(
 @router.get("/history")
 def list_offboarding_history(
     session: Db_session,
-    _: Admin_user,
+    _: Current_user,
     registration: str | None = Query(default=None, description="Filtrer by registration"),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),

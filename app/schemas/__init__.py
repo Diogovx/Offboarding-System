@@ -6,7 +6,7 @@ from ..audit.log_schemas import (
     AuditLogExportedStatus
 )
 from .query_schemas import FilterPage
-from .user_schemas import UserCreate, UserList, UserPublic
+from .user_schemas import UserCreate, UserList, UserPublic, UserUpdate
 from .offboarding_schemas import OffboardingContext
 from .intouch_schemas import (
     InTouchUserSearchModel,

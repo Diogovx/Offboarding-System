@@ -106,7 +106,7 @@ def is_account_enabled(uac: int) -> bool:
 def build_disabled_description(
     old_description: str | None,
     performed_by: str,
-    system_name: str = "Dismissal Assistant System"
+    system_name: str = "Offboarding System"
 ) -> str:
     """
     Creates a new description for a disabled account
