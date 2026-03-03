@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.security import OAuth2PasswordBearer
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
-
+from uuid import UUID
 from app.database import Db_session
 from app.enums import AuditAction, AuditStatus
 from app.models import User
@@ -13,6 +13,7 @@ from app.schemas import (
     AuditLogCreate,
     FilterPage,
     UserCreate,
+    UserUpdate,
     UserList,
     UserPublic,
 )
@@ -75,7 +76,7 @@ def create_test_user(session: Db_session, request: Request):
         email="admin@test.com",
         password=hashed_pwd,
         enabled=True,
-    )
+    )  # type: ignore[call-arg]
     create_audit_log(
         session,
         AuditLogCreate(
@@ -126,7 +127,7 @@ def create_user(
         password=hashed_pwd,
         enabled=True,
         userRole=user.userRole,
-    )
+    )  # type: ignore[call-arg]
     try:
         create_audit_log(
             session,
@@ -162,17 +163,15 @@ def create_user(
     return db_user
 
 
-@router.put("/{username}", response_model=UserPublic)
+@router.put("/{user_id}", response_model=UserPublic)
 def update_user(
-    username: str,
-    user: User,
+    user_id: UUID,
+    user: UserUpdate,
     session: Db_session,
     current_user: Editor_user,
     request: Request
 ):
-    db_user = session.scalar(
-        select(User).where(User.username == username)
-    )
+    db_user = session.get(User, user_id)
     if not db_user:
         create_audit_log(
             session,
@@ -182,7 +181,7 @@ def update_user(
                 message="Target user not found",
                 user_id=current_user.id,
                 username=current_user.username,
-                resource=username,
+                resource=str(user_id),
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
             ),
@@ -190,22 +189,42 @@ def update_user(
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="User not found"
         )
+    if user.username and user.username != db_user.username:
+        check = session.scalar(
+            select(User).where(User.username == user.username)
+        )
+        if check:
+            raise HTTPException(
+                status_code=409,
+                detail="Username already taken"
+            )
+    update_data = user.model_dump(exclude_unset=True)
 
-    db_user.username = user.username
-    db_user.password = user.password
-    db_user.email = user.email
-    session.commit()
-    session.refresh(db_user)
+    for field, value in update_data.items():
+        if field == "password" and value:
+            setattr(db_user, field, get_password_hash(value))
+        else:
+            setattr(db_user, field, value)
+    try:
+        session.commit()
+        session.refresh(db_user)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error during update: {e}"
+        )
 
     create_audit_log(
         session,
         AuditLogCreate(
             action=AuditAction.UPDATE_USER,
             status=AuditStatus.SUCCESS,
-            message=f"User '{username}' updated",
+            message=f"User '{db_user.username}'"
+            " updated by {current_user.username}",
             user_id=current_user.id,
             username=current_user.username,
-            resource=username,
+            resource=db_user.username,
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
         ),
