@@ -1,8 +1,9 @@
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 
 router = APIRouter()
 
 
 @router.get("/")
 async def root():
-    return {"status": "online", "version": "v1.0.0", "docs": "/docs"}
+    return RedirectResponse(url="/pages/index.html")
