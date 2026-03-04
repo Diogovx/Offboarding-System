@@ -105,19 +105,23 @@ def create_user(
     request: Request
 ):
 
-    db_user = (
-        session.query(User).filter(User.username == user.username).first()
+    existing_username = session.scalar(
+        select(User).where(User.username == user.username)
     )
-    if db_user:
-        if db_user.username == user.username:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT,
-                detail="Username already exists",
-            )
-        elif db_user.email == user.email:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT, detail="Email already exists"
-            )
+    if existing_username:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Username already exists",
+        )
+
+    existing_email = session.scalar(
+        select(User).where(User.email == user.email)
+    )
+    if existing_email:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Email already exists",
+        )
 
     hashed_pwd = get_password_hash(user.password)
 
@@ -125,7 +129,7 @@ def create_user(
         username=user.username,
         email=user.email,
         password=hashed_pwd,
-        enabled=True,
+        enabled=user.enabled,
         userRole=user.userRole,
     )  # type: ignore[call-arg]
     try:
@@ -221,7 +225,7 @@ def update_user(
             action=AuditAction.UPDATE_USER,
             status=AuditStatus.SUCCESS,
             message=f"User '{db_user.username}'"
-            " updated by {current_user.username}",
+            f" updated by {current_user.username}",
             user_id=current_user.id,
             username=current_user.username,
             resource=db_user.username,
