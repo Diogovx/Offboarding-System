@@ -1,7 +1,5 @@
 const { createApp, ref, reactive, onMounted } = Vue;
 
-const API_BASE = 'http://127.0.0.1:8000';
-
 axios.interceptors.request.use(cfg => {
     const token = localStorage.getItem('access_token');
     if (token) cfg.headers.Authorization = `Bearer ${token}`;
@@ -36,7 +34,6 @@ createApp({
             {label: 'Offboarding (Catraca)', value: 'disable_turnstile_user'},
             {label: 'Criação de usuário', value: 'create_user'},
             {label: 'Atualização de usuário', value: 'update_user'},
-            {label: 'Remoção de usuário', value: 'delete_user'},
             {label: 'Exportação de registros', value: 'export_audit_logs'},
         ]);
 
@@ -44,6 +41,9 @@ createApp({
             system_login: 'Login',
             system_logout: 'Logout',
             disable_ad_user: 'Offboarding (Rede)',
+            list_users: 'Usuários listados',
+            create_user: 'Usuário criado',
+            update_user: 'Usuário atualizado',
             disable_intouch_user: 'Offboarding (InTouch)',
             disable_turnstile_user: 'Offboarding (Catraca)',
             export_audit_logs: 'Exportação de registros'
@@ -97,9 +97,25 @@ createApp({
         const prevPage = () => { if (filters.page > 1) { filters.page--; fetchLogs(); } };
         const nextPage = () => { filters.page++; fetchLogs(); };
 
+
+        
         const formatDate = (iso) => {
             if (!iso) return '—';
-            return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
+
+ 
+            let dateStr = iso;
+            if (!iso.includes('Z') && !iso.includes('+')) {
+                dateStr = iso + 'Z';
+            }
+
+            const d = new Date(dateStr);
+
+            if (isNaN(d.getTime())) return iso;
+
+            return d.toLocaleString('pt-BR', { 
+                dateStyle: 'short', 
+                timeStyle: 'medium' 
+            });
         };
 
         const exportLogs = async (format) => {
