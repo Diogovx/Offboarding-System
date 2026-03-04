@@ -20,8 +20,13 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     username: str | None = None
     password: str | None = None
+    email: EmailStr | None = None
     enabled: bool | None = None
     userRole: UserRole | None = None
+
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
 
 
 class UserPublic(UserBase):
