@@ -34,6 +34,11 @@
                             :class="{ 'font-semibold border-b-2 border-white text-white': currentPage === 'offboarding' }">
                             Offboarding
                         </a>
+                        <a v-if="isAdmin" href="users_management.html"
+                            class="text-white/80 hover:text-white transition-colors"
+                            :class="{ 'font-semibold border-b-2 border-white text-white': currentPage === 'users_management' }">
+                            Usuários
+                        </a>
                         <!-- Outros links aqui -->
                         <a v-if="isAdmin" href="audit_logs.html"
                             class="text-white/80 hover:text-white transition-colors"
@@ -63,6 +68,7 @@
             <div v-show="menuOpen" class="sm:hidden border-t border-white/20 py-2 px-4 flex flex-col gap-2 text-sm">
                 <span class="text-white/70">Olá, <strong class="text-white">{{ currentUser }}</strong></span>
                 <a href="offboarding.html" class="text-white/80 hover:text-white py-1 transition-colors">Offboarding</a>
+                <a v-if="isAdmin" href="users_management.html" class="text-white/80 cursor-pointer hover:text-white py-1 transition-colors">Usuários</a>
                 <a v-if="isAdmin" href="audit_logs.html" class="text-white/80 hover:text-white py-1 transition-colors">Logs</a>
                 <button @click="logout" class="text-left text-white/80 hover:text-white py-1 transition-colors">Logout</button>
             </div>
