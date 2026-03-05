@@ -79,9 +79,19 @@ def search_user(registration: str) -> InTouchUserSearchModel:
             found=False,
             error="User not found."
         )
+    raw_user = None
     for user in list_users:
         if user.get("location") == 'CTB':
             raw_user = user
+            break
+    if not raw_user:
+        return InTouchUserSearchModel(
+            success=False,
+            found=False,
+            error=(
+                "A collaborator was found, but does not belong to the CTB unit"
+                )
+        )
     status = raw_user.get('status')
     first_name = raw_user.get('firstName', '')
     last_name = raw_user.get('lastName', '')
