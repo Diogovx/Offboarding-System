@@ -5,6 +5,7 @@ services:
     build: .
     image: cladtek/offboarding:latest
     container_name: offboarding_app
+    user: root
     ports:
       - "8086:8000"
     environment:
