@@ -111,10 +111,7 @@ async def disable_user(
             AuditLogCreate(
                 action=AuditAction.DISABLE_AD_USER,
                 status=AuditStatus.SUCCESS,
-                message=(
-                    f"User '{user.sam_account_name}' ({user.name}) "
-                    f"deactivated successfully by {payload.performed_by}"
-                ),
+                message=f"User '{user.user.sam_account_name}' ({user.user.name}) deactivated successfully by {payload.performed_by}",
                 user_id=current_user.id,
                 username=current_user.username,
                 resource=payload.registration,
@@ -123,7 +120,7 @@ async def disable_user(
             ),
         )
 
-        logger.info(f"User {user.sam_account_name} successfully disabled")
+        logger.info(f"User {user.user.sam_account_name} successfully disabled")
 
         return user
 
