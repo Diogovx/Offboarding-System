@@ -29,30 +29,44 @@ createApp({
       enabled: true,
     });
 
-    onMounted(() => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        window.location.href = "index.html";
-        return;
-      }
+    const actionLabels = {
+            system_login: 'Login',
+            system_logout: 'Logout',
+            disable_ad_user: 'Offboarding (Rede)',
+            list_users: 'Usuários listados',
+            create_user: 'Usuário criado',
+            update_user: 'Usuário atualizado',
+            disable_intouch_user: 'Offboarding (InTouch)',
+            disable_turnstile_user: 'Offboarding (Catraca)',
+            export_audit_logs: 'Exportação de registros'
+        };
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      axios.defaults.baseURL = "";
-
-      axios.interceptors.response.use(
-        (response) => response,
-        (error) => {
-          if (error.response && error.response.status === 401) {
-            localStorage.clear();
+        onMounted(() => {
+          const token = localStorage.getItem("access_token");
+          if (!token) {
             window.location.href = "index.html";
+            return;
           }
-          return Promise.reject(error);
-        }
-      );
-
+          
+          api = axios.create({
+            baseURL: "",
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          axios.interceptors.response.use(
+            (response) => response,
+            (error) => {
+              if (error.response && error.response.status === 401) {
+                localStorage.clear();
+                window.location.href = "index.html";
+              }
+              return Promise.reject(error);
+            }
+          );
+          
       checkAdmin();
       getUsers();
     });
+    let api;
 
     const filteredUsers = computed(() => {
       return users.value.filter((u) => {
@@ -114,10 +128,9 @@ createApp({
 
     const checkAdmin = async () => {
       try {
-        const { data } = await axios.get("/users/me");
+        const { data } = await api.get("/users/me");
         isAdmin.value = data.userRole === 1;
         if (!isAdmin.value) {
-          alert("Acesso negado: apenas administradores.");
           window.location.href = "offboarding.html";
         }
       } catch {
@@ -127,7 +140,7 @@ createApp({
 
     const getUsers = async () => {
       try {
-        const res = await axios.get("/users/");
+        const res = await api.get("/users/");
         users.value = res.data.users;
       } catch (err) {
         console.error("Erro ao carregar usuários:", err);
@@ -156,7 +169,7 @@ createApp({
       loadingHistory.value = true;
       userLogs.value = [];
       try {
-        const res = await axios.get(`/logs?username=${user.username}&limit=10`);
+        const res = await api.get(`/logs?username=${user.username}&limit=10`);
         const raw = res.data;
         userLogs.value = Array.isArray(raw)
           ? raw
@@ -209,10 +222,10 @@ createApp({
           if (f.enabled  !== o.enabled)  payload.enabled  = f.enabled;
           if (f.password)                payload.password = f.password;
 
-          await axios.put(`/users/${selectedUser.value.id}`, payload);
+          await api.put(`/users/${selectedUser.value.id}`, payload);
           feedback.value = "Usuário atualizado com sucesso!";
         } else {
-          await axios.post("/users/", {
+          await api.post("/users/", {
             username: form.value.username,
             email:    form.value.email,
             password: form.value.password,
@@ -242,7 +255,7 @@ createApp({
     };
 
     return {
-      users, userLogs, currentUser, isAdmin,
+      users, actionLabels, userLogs, currentUser, isAdmin,
       searchQuery, statusFilter, currentPage, menuOpen,
       confirmPassword, passwordCriteria, passwordsMatch,
       isFormValid, isDirty, feedback, formError,

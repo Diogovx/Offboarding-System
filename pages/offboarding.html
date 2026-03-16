@@ -51,7 +51,7 @@
                 <!-- User info + logout (desktop) + hamburguer (mobile) -->
                 <div class="flex items-center gap-3 text-sm">
                     <span class="hidden sm:inline">Olá, <strong>{{ currentUser }}</strong></span>
-                    <button @click="logout" class="hidden sm:block bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors">Logout</button>
+                    <button @click="logout" class="hidden cursor-pointer sm:block bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors">Logout</button>
                     <!-- Botão hamburguer -->
                     <button @click="menuOpen = !menuOpen" class="sm:hidden p-1 rounded hover:bg-white/20 transition-colors">
                         <svg v-if="!menuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@
                 <div class="flex gap-2">
                     <input v-model="searchQuery" @keyup.enter="searchUser" type="text" placeholder="Matrícula" 
                         class="block w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-cladtek transition-all">
-                    <button @click="searchUser" :disabled="isLoading" class="bg-cladtek hover:bg-cladtek-dark text-white px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50 min-w-[100px]">
+                    <button @click="searchUser" :disabled="isLoading" class="bg-cladtek cursor-pointer hover:bg-cladtek-dark text-white px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50 min-w-[100px]">
                         {{ isLoading ? '...' : 'Buscar' }}
                     </button>
                 </div>
@@ -112,7 +112,7 @@
                         <button 
                             @click="showConfirmModal = true" 
                             :disabled="isOffboarded"
-                            class="shrink-0 border px-4 py-2 rounded-lg font-bold transition-all text-sm"
+                            class="shrink-0 cursor-pointer border px-4 py-2 rounded-lg font-bold transition-all text-sm"
                             :class="isOffboarded 
                                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
                                 : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-600 hover:text-white cursor-pointer'">
@@ -210,11 +210,11 @@
                         </div>
                         <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-100">
                             <button type="button" @click="confirmOffboarding" 
-                                    class="inline-flex w-full justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 sm:ml-3 sm:w-auto transition-colors">
-                                {{ isProcessing ? 'Processing...' : 'Desativar' }}
+                                    class="inline-flex w-full cursor-pointer justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 sm:ml-3 sm:w-auto transition-colors">
+                                {{ isProcessing ? 'Processando...' : 'Desativar' }}
                             </button>
                             <button type="button" @click="showConfirmModal = false" 
-                                    class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-bold text-cladtek ring-1 ring-inset ring-cladtek hover:bg-cladtek hover:text-white sm:mt-0 sm:w-auto transition-all">
+                                    class="mt-3 cursor-pointer inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-bold text-cladtek ring-1 ring-inset ring-cladtek hover:bg-cladtek hover:text-white sm:mt-0 sm:w-auto transition-all">
                                 Cancelar 
                             </button>
                         </div>
