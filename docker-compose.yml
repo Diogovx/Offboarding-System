@@ -47,5 +47,9 @@ services:
       - offboarding
     restart: always
 
+networks:
+  internal:
+    driver: bridge
+
 volumes:
   offboarding_data:
