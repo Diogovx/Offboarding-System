@@ -72,7 +72,7 @@
             <div class="flex gap-2">
               <!-- Filtro de status -->
               <div class="relative inline-block flex-1 sm:flex-none sm:w-48 text-sm group">
-                <button type="button" class="peer w-full h-[38px] flex items-center justify-between px-4 cursor-pointer border rounded-lg bg-white text-gray-700 border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cladtek transition-all">
+                <button type="button" class="peer w-full h-[38px] flex items-center justify-between px-4 cursor-pointer border rounded-lg bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cladtek transition-all">
                   <span class="font-medium truncate">{{ statusFilter === 'all' ? 'Todos' : (statusFilter === 'active' ? 'Ativos' : 'Inativos') }}</span>
                   <svg class="w-4 h-4 ml-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                 </button>
@@ -211,7 +211,7 @@
             </div>
             <div>
               <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Senha</label>
-              <input v-model="form.password" type="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 outline-none focus:ring-2 focus:ring-cladtek/20 focus:border-cladtek transition-all">
+              <input v-model="form.password" type="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 outline-none focus:ring-2 focus:ring-cladtek transition-all">
               <div v-if="form.password || !isEditing" class="mt-2 grid grid-cols-2 gap-1 text-[9px] font-bold">
                 <span :class="passwordCriteria.length  ? 'text-green-600' : 'text-gray-400'">● Min. 8 caracteres</span>
                 <span :class="passwordCriteria.upper   ? 'text-green-600' : 'text-gray-400'">● Letra Maiúscula</span>
@@ -223,7 +223,7 @@
               <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirmar Senha</label>
               <input v-model="confirmPassword" type="password" placeholder="••••••••"
                 class="w-full border rounded-lg px-3 py-2 mt-1 outline-none focus:ring-2 transition-all"
-                :class="passwordsMatch || !confirmPassword ? 'border-gray-300 focus:ring-cladtek/20' : 'border-red-500 focus:ring-red-200'">
+                :class="passwordsMatch || !confirmPassword ? 'border-gray-300 focus:ring-cladtek' : 'border-red-500 focus:ring-red-200'">
               <p v-if="!passwordsMatch && confirmPassword" class="text-[10px] text-red-500 mt-1 font-bold animate-pulse">As senhas não coincidem.</p>
             </div>
 
@@ -231,7 +231,7 @@
               <div class="flex flex-col">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Nível de Acesso</label>
                 <div class="relative inline-block w-full text-sm group">
-                  <button type="button" class="peer w-full h-[38px] flex items-center justify-between px-4 cursor-pointer border rounded-lg bg-white text-gray-700 border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cladtek transition-all">
+                  <button type="button" class="peer w-full h-[38px] flex items-center justify-between px-4 cursor-pointer border rounded-lg bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cladtek transition-all">
                     <span class="font-medium truncate">{{ form.userRole === 1 ? 'Admin' : 'Comum' }}</span>
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                   </button>
@@ -283,7 +283,7 @@
             <div v-else class="space-y-3">
               <div v-for="log in userLogs" :key="log.id" class="border-l-4 border-cladtek bg-gray-50 p-3 rounded-r-lg">
                 <div class="flex flex-col sm:flex-row sm:justify-between text-xs font-bold text-gray-500 mb-1 gap-0.5">
-                  <span>{{ log.action }}</span>
+                  <span>{{ actionLabels[log.action] || log.action }}</span>
                   <span class="text-gray-400">{{ formatLogDate(log) }}</span>
                 </div>
                 <p class="text-sm text-gray-700">{{ log.message }}</p>

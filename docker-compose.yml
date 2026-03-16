@@ -6,8 +6,9 @@ services:
     image: cladtek/offboarding:latest
     container_name: offboarding_app
     user: root
-    ports:
-      - "8086:8000"
+    networks:
+      - internal
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - ALGORITHM=${ALGORITHM}
@@ -31,6 +32,19 @@ services:
       - TURNSTILE_B_SESSION=${TURNSTILE_B_SESSION}
     volumes:
       - offboarding_data:/app/data
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    networks:
+      - internal
+    ports:
+      - "8086:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - offboarding
     restart: always
 
 volumes:

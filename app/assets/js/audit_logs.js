@@ -85,7 +85,14 @@ createApp({
         };
 
         const applyFilters = () => {
+            error.value = '';
             filters.page = 1;
+            if (filters.date_from && filters.date_to) {
+                if (new Date(filters.date_to) < new Date(filters.date_from)) {
+                    error.value = "A data final não pode ser anterior à data inicial.";
+                    return;
+                }
+            }
             fetchLogs();
         };
 

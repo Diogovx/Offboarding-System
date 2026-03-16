@@ -77,6 +77,11 @@ def create_test_user(session: Db_session, request: Request):
         password=hashed_pwd,
         enabled=True,
     )  # type: ignore[call-arg]
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
     create_audit_log(
         session,
         AuditLogCreate(
@@ -90,10 +95,6 @@ def create_test_user(session: Db_session, request: Request):
             user_agent=request.headers.get("user-agent"),
         ),
     )
-
-    session.add(user)
-    session.commit()
-    session.refresh(user)
     return user
 
 
@@ -202,6 +203,13 @@ def update_user(
                 status_code=409,
                 detail="Username already taken"
             )
+    if user.email and user.email != db_user.email:
+        existing_email = session.scalar(
+            select(User).where(User.email == user.email)
+        )
+        if existing_email:
+            raise HTTPException(status_code=409, detail="Email already taken")
+
     update_data = user.model_dump(exclude_unset=True)
 
     for field, value in update_data.items():
