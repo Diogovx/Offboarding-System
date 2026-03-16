@@ -14,19 +14,21 @@ from app.security import (
 )
 from app.services import create_audit_log
 from slowapi import Limiter
-from slowapi.util import get_remote_address
+
+
+def get_client_ip(request: Request) -> str:
+    if x_forwarded_for := request.headers.get("X-Forwarded-For"):
+        real_ip = x_forwarded_for.split(",")[0].strip()
+        if real_ip and real_ip != "127.0.0.1":
+            return real_ip
+    if x_real_ip := request.headers.get("X-Real-IP"):
+        if x_real_ip != "127.0.0.1":
+            return x_real_ip
+    return request.client.host if request.client else "127.0.0.1"
 
 
 router = APIRouter()
-limiter = Limiter(key_func=get_remote_address)
-
-
-def get_client_ip(request: Request) -> str | None:
-    if x_real_ip := request.headers.get("X-Real-IP"):
-        return x_real_ip
-    if x_forwarded_for := request.headers.get("X-Forwarded-For"):
-        return x_forwarded_for.split(",")[0].strip()
-    return request.client.host if request.client else None
+limiter = Limiter(key_func=get_client_ip)
 
 
 @router.post("/token")
@@ -47,7 +49,7 @@ def login(
                 user_id=user.id if user else None,
                 username=form_data.username,
                 resource="/auth/token",
-                ip_address=request.client.host if request.client else None,
+                ip_address=get_client_ip(request),
                 user_agent=request.headers.get("user-agent"),
             ),
         )
