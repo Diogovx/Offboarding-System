@@ -21,6 +21,14 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
+def get_client_ip(request: Request) -> str | None:
+    if x_real_ip := request.headers.get("X-Real-IP"):
+        return x_real_ip
+    if x_forwarded_for := request.headers.get("X-Forwarded-For"):
+        return x_forwarded_for.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
 @router.post("/token")
 @limiter.limit("5/minute")
 def login(
@@ -56,7 +64,7 @@ def login(
                 user_id=user.id if user else None,
                 username=form_data.username,
                 resource="/auth/token",
-                ip_address=request.client.host if request.client else None,
+                ip_address=get_client_ip(request),
                 user_agent=request.headers.get("user-agent"),
             ),
         )
@@ -80,7 +88,7 @@ def logout(
             user_id=session.id,
             username=session.username,
             resource="/auth/logout",
-            ip_address=request.client.host if request.client else None,
+            ip_address=get_client_ip(request),
             user_agent=request.headers.get("user-agent"),
         ),
     )
