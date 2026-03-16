@@ -41,7 +41,7 @@ services:
     ports:
       - "8086:80"
     volumes:
-      - ./nginx_v1.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx_v1.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - offboarding
     restart: always
