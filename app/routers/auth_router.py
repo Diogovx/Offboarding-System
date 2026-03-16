@@ -13,11 +13,16 @@ from app.security import (
     verify_password,
 )
 from app.services import create_audit_log
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/token")
+@limiter.limit("5/minute")
 def login(
     db: Db_session,
     request: Request,
