@@ -20,10 +20,10 @@ async def verify_v1_old(registration: str):
 async def verify_v2_new(registration: str):
     ad_service = ADService()
     
-    tarefa_ad = run_in_threadpool(ad_service.search_users, registration=registration)
-    tarefa_intouch = run_in_threadpool(intouch_service.search_user, registration=registration)
+    task_ad = run_in_threadpool(ad_service.search_users, registration=registration)
+    task_intouch = run_in_threadpool(intouch_service.search_user, registration=registration)
     
-    ad_response, intouch_data = await asyncio.gather(tarefa_ad, tarefa_intouch)
+    ad_response, intouch_data = await asyncio.gather(task_ad, task_intouch)
     
     return bool(ad_response), bool(intouch_data)
 
