@@ -1,5 +1,10 @@
-from fastapi import Request
+import asyncio
+
 from logging import getLogger
+
+from fastapi import Request, HTTPException
+from fastapi.concurrency import run_in_threadpool
+
 from app.database import Db_session
 from sqlalchemy import select, func
 from app.audit.audit_log_service import create_audit_log
@@ -95,17 +100,31 @@ async def verify_services_before_disabling(
     service_map: dict[str, bool] = {}
     ad_service = ADService()
 
-    ad_response = ad_service.search_users(registration=registration)
+    task_ad = run_in_threadpool(ad_service.search_users, registration=registration)
+    task_intouch = run_in_threadpool(intouch_service.search_user, registration=registration)
+    
+    try:
+        ad_response, intouch_data = await asyncio.wait_for(
+            asyncio.gather(task_ad, task_intouch),
+            timeout=10.0
+        )
+    except asyncio.TimeoutError:
+        logger.error(f"Timeout: The search for services took more than 10 seconds.")
+        raise HTTPException(
+            status_code=504,
+            detail="External systems (AD or InTouch) are taking too long to respond. Please try again in a few moments."
+        )
+
     if ad_response and len(ad_response) > 0:
         ad_user = ad_response[0]
         enabled = ad_user.enabled
         service_map['Rede'] = bool(enabled)
 
-    intouch_data = intouch_service.search_user(registration=registration)
     if intouch_data and intouch_data.success:
         service_map["InTouch"] = bool(intouch_data.is_active)
 
     # TODO Turnstile
+    # add Turnstile threadpool later
 
     logger.info(f"Active services for {registration}: {service_map}")
     return service_map
@@ -147,7 +166,8 @@ async def execute_offboarding(
     req: Request,
     session: Db_session
 ):
-    target_user = intouch_service.search_user(registration)
+
+    target_user = await run_in_threadpool(intouch_service.search_user, registration)
     print(target_user.name)
 
     if not target_user:
@@ -237,7 +257,7 @@ async def execute_offboarding(
                 registration=registration,
                 performed_by=current_user.username,
             )
-            res_ad = ad_service.disable_user(payload_ad)
+            res_ad = await run_in_threadpool(ad_service.disable_user, payload_ad)
             if res_ad.action == "disabled":
                 successfully_revoked.append("Rede")
                 _audit(
