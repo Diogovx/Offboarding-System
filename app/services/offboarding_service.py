@@ -179,6 +179,7 @@ async def execute_offboarding(
     services_map = await verify_services_before_disabling(registration)
 
     successfully_revoked: list[str] = []
+    name_user_taget = target_user.name
 
     if services_map.get("Turnstiles") is True:
         try:
@@ -313,8 +314,10 @@ async def execute_offboarding(
             email_service.send_email,
             registration=registration,
             action=action_email,
+            user_target=name_user_taget,
             performed_by=str(current_user.username),
-            systems_list=successfully_revoked
+            systems_list=successfully_revoked,
+            
         )
 
         return {"success": True, "details": successfully_revoked}
