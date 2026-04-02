@@ -8,11 +8,16 @@ from app.enums import EmailActions
 from app.config import settings
 
 
+
+
 async def send_email(
     registration: str,
     action: EmailActions,
+    user_target: str,
     performed_by: str = "System",
     systems_list: list | None = None
+   
+    
     ):
     now = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime(
         "%d/%m/%Y %H:%M:%S"
@@ -33,7 +38,7 @@ async def send_email(
     msg["To"] = settings.EMAIL_RECEIVER
 
     msg.set_content(
-        f"O usuário com o registro {registration} "
+        f"O usuário {user_target} (registro: {registration}) "
         f"passou pelo processo de: ({action.value}).\n"
         f"Executor: {performed_by}\n"
         f"{txt_details}\n"
