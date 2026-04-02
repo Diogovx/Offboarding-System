@@ -38,7 +38,7 @@ async def send_email(
     msg["To"] = settings.EMAIL_RECEIVER
 
     msg.set_content(
-        f"O usuário {user_target} (registro: {registration}) "
+        f"O usuário {user_target} com o registro {registration} "
         f"passou pelo processo de: ({action.value}).\n"
         f"Executor: {performed_by}\n"
         f"{txt_details}\n"
