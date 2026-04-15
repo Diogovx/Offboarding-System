@@ -6,7 +6,7 @@ from app.database import Db_session
 from app.enums import AuditAction, AuditStatus
 from app.models.user_model import User
 from app.schemas import AuditLogCreate
-from app.security import (
+from app.infra.security import (
     Current_user,
     Form_data,
     create_access_token,

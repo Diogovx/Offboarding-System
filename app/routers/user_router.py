@@ -17,7 +17,7 @@ from app.schemas import (
     UserList,
     UserPublic,
 )
-from app.security import (
+from app.infra.security import (
     Current_user,
     Editor_user,
     Token,

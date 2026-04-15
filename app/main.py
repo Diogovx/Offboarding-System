@@ -14,7 +14,7 @@ from app.routers import (
     system_router,
     user_router,
 )
-from app.security import start_scheduler
+from app.infra.security import start_scheduler
 
 
 @asynccontextmanager

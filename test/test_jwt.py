@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from app.database import get_db
 from app.main import app
 from app.models import User
-from app.security import SECRET_KEY, create_access_token, get_password_hash
+from app.infra.security import SECRET_KEY, create_access_token, get_password_hash
 
 from .database import SessionLocalTest
 

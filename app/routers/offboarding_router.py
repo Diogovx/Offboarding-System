@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, Request, Query
 
 from app.database import Db_session
-from app.security import Current_user
+from app.infra.security import Current_user
 from app.services import (
     execute_offboarding,
     get_offboarding_history,

@@ -7,7 +7,7 @@ from app.database import Db_session
 from app.enums import AuditAction, AuditStatus
 from app.models import ADUser, DisableUserRequest
 from app.schemas import AuditLogCreate
-from app.security import Current_user
+from app.infra.security import Current_user
 from app.services import ADServiceDep
 
 logger = getLogger(__name__)

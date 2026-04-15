@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.audit.audit_model import AuditLog
 from app.database import SessionLocal
-from app.security import RETENTION_POLICY
+from app.infra.security import RETENTION_POLICY
 
 
 def cleanup_audit_logs_db() -> int:
