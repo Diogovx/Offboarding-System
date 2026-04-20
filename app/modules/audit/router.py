@@ -5,15 +5,16 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse
 
 from app.core.database import Db_session
-from app.enums import AuditAction, AuditStatus
-from app.schemas import (
+from .enums import AuditAction, AuditStatus
+from .schemas import (
     AuditLogCreate,
     ExportContext,
     AuditLogList,
     AuditLogExportedStatus
 )
-from app.core.security import Admin_user, Audit_log_list_filters
-from app.services import (
+from app.core import Admin_user
+from .deps import Audit_log_list_filters
+from .service import (
     create_audit_log,
     export_audit_logs_task,
     fetch_audit_logs,

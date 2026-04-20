@@ -1,10 +1,11 @@
 from fastapi import Depends
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, registry
 from typing import Annotated
 
-from app.models import table_registry
-from app.core.config.config import settings
+from app.core.config import settings
+
+table_registry = registry()
 
 engine = create_engine(
     settings.DATABASE_URL, connect_args={"check_same_thread": False}

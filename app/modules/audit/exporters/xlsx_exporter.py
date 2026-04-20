@@ -5,7 +5,7 @@ from openpyxl.utils import get_column_letter
 from .base import AuditLogExporter
 from typing import Iterable, Any
 # Importamos os mapeamentos que criamos anteriormente
-from .columns_map import ACTION_LABELS, COLUMN_HEADERS, STATUS_LABELS
+from .base import ACTION_LABELS, COLUMN_HEADERS, STATUS_LABELS
 
 
 class XLSXExporter(AuditLogExporter):

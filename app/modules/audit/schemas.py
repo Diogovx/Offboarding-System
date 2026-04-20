@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.enums import AuditAction, AuditStatus
+from .enums import AuditAction, AuditStatus
 
 
 class AuditLogCreate(BaseModel):

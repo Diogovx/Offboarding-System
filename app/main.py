@@ -14,7 +14,7 @@ from app.modules.users import user_router
 from app.modules.users import (
     auth_router,
 )
-from app.core.security import start_scheduler
+from app.modules.audit.cleanup.scheduler import start_scheduler
 
 
 @asynccontextmanager

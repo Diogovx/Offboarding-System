@@ -1,11 +1,11 @@
 from fastapi import APIRouter, BackgroundTasks, Request, Query
 
 from app.core.database import Db_session
-from app.core.security import Current_user
-from app.services import (
+from app.core import Current_user
+from app.integrations.active_directory import ADServiceDep
+from .service import (
     execute_offboarding,
     get_offboarding_history,
-    ADServiceDep,
     verify_services_before_disabling
 )
 

@@ -2,8 +2,8 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
-from app.enums import EmailActions
-from app.core.security import Current_user
+#from app.enums import EmailActions
+from app.core import Current_user
 from app.integrations.intouch import service
 from app.modules.shared.email_service import send_email
 
@@ -40,8 +40,8 @@ async def deactivate_user_intouch(
             detail="Error while deactivating user"
         )
 
-    action = EmailActions.get_by_id(3)
-    background_tasks.add_task(send_email, registration, action)
+    #action = EmailActions.get_by_id(3)
+    #background_tasks.add_task(send_email, registration, action)
 
     return {
         "message": "User successfully deactivated",
@@ -63,8 +63,8 @@ async def activate_user_intouch(
             detail=res_intouch.error
         )
 
-    action = EmailActions.get_by_id(2)
-    background_tasks.add_task(send_email, registration, action)
+    #action = EmailActions.get_by_id(2)
+    #background_tasks.add_task(send_email, registration, action)
 
     return {
         "message": "User successfully activated",

@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from app.enums import AuditAction
+from app.modules.audit.enums import AuditAction
 
 RETENTION_POLICY = {
     AuditAction.EXPORT_AUDIT_LOGS: timedelta(days=180),

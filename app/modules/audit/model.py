@@ -4,7 +4,8 @@ from uuid import UUID
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models import SqliteUUID, table_registry
+from app.modules.shared import SqliteUUID
+from app.core import table_registry
 
 
 @table_registry.mapped

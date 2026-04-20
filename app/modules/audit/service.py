@@ -8,7 +8,7 @@ from logging import getLogger
 from app.modules.audit.model import AuditLog
 from app.modules.audit.exporters import CSVExporter, JSONLExporter, PDFExporter, XLSXExporter
 from app.core.database import SessionLocal
-from app.schemas import AuditLogCreate, AuditLogListFilters, AuditLogList
+from .schemas import AuditLogCreate, AuditLogListFilters, AuditLogList
 from .exporters.serializer import audit_log_to_dict
 
 logger = getLogger(__name__)

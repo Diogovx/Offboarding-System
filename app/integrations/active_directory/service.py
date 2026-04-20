@@ -1,7 +1,7 @@
 import logging
 from typing import Sequence
 
-from app.models import ADUser, DisableUserRequest
+from .schemas import ADUser, DisableUserRequest, ADUserDisableResponse
 from app.integrations.active_directory.constants import UserAccountControl
 from app.integrations.active_directory.exceptions import (
     MultipleUsersFoundError,
@@ -14,7 +14,6 @@ from app.integrations.active_directory.utils import (
     validate_performed_by,
     validate_registration,
 )
-from app.integrations.active_directory.schemas.schemas import ADUserDisableResponse
 
 logger = logging.getLogger(__name__)
 

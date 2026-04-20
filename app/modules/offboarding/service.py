@@ -8,18 +8,22 @@ from fastapi.concurrency import run_in_threadpool
 from app.core.database import Db_session
 from sqlalchemy import select, func
 from app.modules.audit.service import create_audit_log
-from app.enums import AuditAction, AuditStatus, EmailActions
-from app.models import (
-    DisableUserRequest,
+from app.modules.shared import (
+    #AuditAction,
+    #AuditStatus,
+    EmailActions
+)
+from .model import (
     OffboardingRecord,
     RevokedAccess,
 )
-from app.integrations.gate import service
+from app.integrations.active_directory import DisableUserRequest, ADService
+from app.integrations.gate import deactivate_user_turnstiles
 from app.integrations.intouch import service
 from app.modules.shared import email_service
-from app.schemas import AuditLogCreate, OffboardingContext
-from app.services import (
-    ADService
+from .schemas import (
+    #AuditLogCreate,
+    OffboardingContext
 )
 
 
@@ -141,21 +145,22 @@ def _audit(
     target_username,
     req
 ):
-    create_audit_log(
-        session,
-        AuditLogCreate(
-            action=action,
-            status=status,
-            message=message,
-            user_id=current_user.id,
-            username=current_user.username,
-            target_username=target_username,
-            target_registration=registration,
-            resource=registration,
-            ip_address=req.client.host if req.client else None,
-            user_agent=req.headers.get("user-agent"),
-        ),
-    )
+    pass
+    # create_audit_log(
+    #     session,
+    #     AuditLogCreate(
+    #         action=action,
+    #         status=status,
+    #         message=message,
+    #         user_id=current_user.id,
+    #         username=current_user.username,
+    #         target_username=target_username,
+    #         target_registration=registration,
+    #         resource=registration,
+    #         ip_address=req.client.host if req.client else None,
+    #         user_agent=req.headers.get("user-agent"),
+    #     ),
+    # )
 
 
 async def execute_offboarding(
@@ -184,73 +189,75 @@ async def execute_offboarding(
     if services_map.get("Turnstiles") is True:
         try:
             res_turnstiles = await (
-                service.deactivate_user_turnstiles(
+                deactivate_user_turnstiles(
                     registration=registration
                 )
             )
             if res_turnstiles.get("success"):
                 successfully_revoked.append("Acesso")
 
-                _audit(
-                    session=session,
-                    action=AuditAction.DISABLE_TURNSTILE_USER,
-                    status=AuditStatus.SUCCESS,
-                    message=f"User {registration} blocked in all turnstiles.",
-                    current_user=current_user,
-                    target_username=target_user.name,
-                    registration=registration,
-                    req=req
-                )
+                # _audit(
+                #     session=session,
+                #     action=AuditAction.DISABLE_TURNSTILE_USER,
+                #     status=AuditStatus.SUCCESS,
+                #     message=f"User {registration} blocked in all turnstiles.",
+                #     current_user=current_user,
+                #     target_username=target_user.name,
+                #     registration=registration,
+                #     req=req
+                # )
         except Exception as e:
-            _audit(
-                session=session,
-                action=AuditAction.DISABLE_TURNSTILE_USER,
-                status=AuditStatus.FAILED,
-                message=f"Turnstile deactivation failed: {e}",
-                current_user=current_user,
-                target_username=target_user.name,
-                registration=registration,
-                req=req
-            )
+            pass
+            # _audit(
+            #     session=session,
+            #     action=AuditAction.DISABLE_TURNSTILE_USER,
+            #     status=AuditStatus.FAILED,
+            #     message=f"Turnstile deactivation failed: {e}",
+            #     current_user=current_user,
+            #     target_username=target_user.name,
+            #     registration=registration,
+            #     req=req
+            # )
 
     if services_map.get("InTouch") is True:
         try:
             res = await service.deactivate_user_intouch(registration)
             if res.success:
                 successfully_revoked.append("InTouch")
-                _audit(
-                    session=session,
-                    action=AuditAction.DISABLE_INTOUCH_USER,
-                    status=AuditStatus.SUCCESS,
-                    message=f"InTouch: {res.message}",
-                    current_user=current_user,
-                    target_username=target_user.name,
-                    registration=registration,
-                    req=req
-                )
+                # _audit(
+                #     session=session,
+                #     action=AuditAction.DISABLE_INTOUCH_USER,
+                #     status=AuditStatus.SUCCESS,
+                #     message=f"InTouch: {res.message}",
+                #     current_user=current_user,
+                #     target_username=target_user.name,
+                #     registration=registration,
+                #     req=req
+                # )
             else:
-                _audit(
-                    session=session,
-                    action=AuditAction.DISABLE_INTOUCH_USER,
-                    status=AuditStatus.FAILED,
-                    message=f"InTouch: {res.error}",
-                    current_user=current_user,
-                    target_username=target_user.name,
-                    registration=registration,
-                    req=req
-                )
+                pass
+                # _audit(
+                #     session=session,
+                #     action=AuditAction.DISABLE_INTOUCH_USER,
+                #     status=AuditStatus.FAILED,
+                #     message=f"InTouch: {res.error}",
+                #     current_user=current_user,
+                #     target_username=target_user.name,
+                #     registration=registration,
+                #     req=req
+                # )
         except Exception as e:
             logger.error(f"InTouch error for {registration}: {e}")
-            _audit(
-                session=session,
-                action=AuditAction.DISABLE_INTOUCH_USER,
-                status=AuditStatus.FAILED,
-                message=f"InTouch deactivation failed: {e}",
-                current_user=current_user,
-                target_username=target_user.name,
-                registration=registration,
-                req=req
-            )
+            # _audit(
+            #     session=session,
+            #     action=AuditAction.DISABLE_INTOUCH_USER,
+            #     status=AuditStatus.FAILED,
+            #     message=f"InTouch deactivation failed: {e}",
+            #     current_user=current_user,
+            #     target_username=target_user.name,
+            #     registration=registration,
+            #     req=req
+            # )
 
     if services_map.get("Rede") is True:
         try:
@@ -261,16 +268,16 @@ async def execute_offboarding(
             res_ad = await run_in_threadpool(ad_service.disable_user, payload_ad)
             if res_ad.action == "disabled":
                 successfully_revoked.append("Rede")
-                _audit(
-                    session=session,
-                    action=AuditAction.DISABLE_AD_USER,
-                    status=AuditStatus.SUCCESS,
-                    message=f"User {registration} deactivated from AD.",
-                    current_user=current_user,
-                    target_username=target_user.name,
-                    registration=registration,
-                    req=req
-                )
+                # _audit(
+                #     session=session,
+                #     action=AuditAction.DISABLE_AD_USER,
+                #     status=AuditStatus.SUCCESS,
+                #     message=f"User {registration} deactivated from AD.",
+                #     current_user=current_user,
+                #     target_username=target_user.name,
+                #     registration=registration,
+                #     req=req
+                # )
             elif res_ad.action == "already_disabled":
                 successfully_revoked.append("Rede")
                 logger.warning(
@@ -280,16 +287,16 @@ async def execute_offboarding(
                 )
         except Exception as e:
             logger.error(f"AD error for {registration}: {e}")
-            _audit(
-                session=session,
-                action=AuditAction.DISABLE_AD_USER,
-                status=AuditStatus.FAILED,
-                message=f"AD deactivation failed: {e}",
-                current_user=current_user,
-                target_username=target_user.name,
-                registration=registration,
-                req=req
-            )
+            # _audit(
+            #     session=session,
+            #     action=AuditAction.DISABLE_AD_USER,
+            #     status=AuditStatus.FAILED,
+            #     message=f"AD deactivation failed: {e}",
+            #     current_user=current_user,
+            #     target_username=target_user.name,
+            #     registration=registration,
+            #     req=req
+            # )
 
     if successfully_revoked:
         try:

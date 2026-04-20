@@ -11,7 +11,7 @@ from reportlab.lib.styles import getSampleStyleSheet  # type: ignore
 from reportlab.lib.pagesizes import landscape, A4  # type: ignore
 from reportlab.lib import colors  # type: ignore
 from .base import AuditLogExporter
-from .columns_map import ACTION_LABELS, COLUMN_HEADERS, STATUS_LABELS
+from .base import ACTION_LABELS, COLUMN_HEADERS, STATUS_LABELS
 
 
 class PDFExporter(AuditLogExporter):

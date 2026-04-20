@@ -1,4 +1,4 @@
-from enums import IntEnum
+from enum import IntEnum
 
 class UserRole(IntEnum):
     ADMIM = 1

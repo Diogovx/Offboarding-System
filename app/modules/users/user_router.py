@@ -7,24 +7,24 @@ from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy import select
 from uuid import UUID
 from app.core.database import Db_session
-from app.enums import AuditAction, AuditStatus
-from app.models import User
-from app.schemas import (
-    AuditLogCreate,
+#from app.enums import AuditAction, AuditStatus
+from .model import User
+from .schemas import (
+    #AuditLogCreate,
     FilterPage,
     UserCreate,
     UserUpdate,
     UserList,
     UserPublic,
 )
-from app.core.security import (
+from app.core import (
     Current_user,
     Editor_user,
-    Token,
     get_password_hash,
 )
+from .deps import Token
 from app.core.config import settings
-from app.services import create_audit_log
+#from app.services import create_audit_log
 
 router = APIRouter(prefix="/users", tags=["Users"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -41,20 +41,20 @@ def list_users(
         select(User).offset(filter_users.offset).limit(filter_users.limit)
     ).all()
 
-    create_audit_log(
-        session,
-        AuditLogCreate(
-            action=AuditAction.LIST_USERS,
-            status=AuditStatus.SUCCESS,
-            message=f"""Listed users offset={filter_users.offset}
-            limit={filter_users.limit}""",
-            user_id=current_user.id,
-            username=current_user.username,
-            resource="/users",
-            ip_address=request.client.host if request.client else None,
-            user_agent=request.headers.get("user-agent"),
-        ),
-    )
+    # create_audit_log(
+    #     session,
+    #     AuditLogCreate(
+    #         action=AuditAction.LIST_USERS,
+    #         status=AuditStatus.SUCCESS,
+    #         message=f"""Listed users offset={filter_users.offset}
+    #         limit={filter_users.limit}""",
+    #         user_id=current_user.id,
+    #         username=current_user.username,
+    #         resource="/users",
+    #         ip_address=request.client.host if request.client else None,
+    #         user_agent=request.headers.get("user-agent"),
+    #     ),
+    # )
 
     return {"users": users}
 
@@ -82,19 +82,19 @@ def create_test_user(session: Db_session, request: Request):
     session.commit()
     session.refresh(user)
 
-    create_audit_log(
-        session,
-        AuditLogCreate(
-            action=AuditAction.CREATE_USER,
-            status=AuditStatus.SUCCESS,
-            message="Test user created",
-            user_id=None,
-            username="system",
-            resource="test-user",
-            ip_address=request.client.host if request.client else None,
-            user_agent=request.headers.get("user-agent"),
-        ),
-    )
+    # create_audit_log(
+    #     session,
+    #     AuditLogCreate(
+    #         action=AuditAction.CREATE_USER,
+    #         status=AuditStatus.SUCCESS,
+    #         message="Test user created",
+    #         user_id=None,
+    #         username="system",
+    #         resource="test-user",
+    #         ip_address=request.client.host if request.client else None,
+    #         user_agent=request.headers.get("user-agent"),
+    #     ),
+    # )
     return user
 
 
@@ -133,34 +133,34 @@ def create_user(
         enabled=user.enabled,
         userRole=user.userRole,
     )  # type: ignore[call-arg]
-    try:
-        create_audit_log(
-            session,
-            AuditLogCreate(
-                action=AuditAction.CREATE_USER,
-                status=AuditStatus.SUCCESS,
-                message=f"User '{user.username}' created",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=user.username,
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
-    except HTTPException:
-        create_audit_log(
-            session,
-                AuditLogCreate(
-                action=AuditAction.CREATE_USER,
-                status=AuditStatus.FAILED,
-                message="Username or email already exists",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=user.username,
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+    # try:
+    #     create_audit_log(
+    #         session,
+    #         AuditLogCreate(
+    #             action=AuditAction.CREATE_USER,
+    #             status=AuditStatus.SUCCESS,
+    #             message=f"User '{user.username}' created",
+    #             user_id=current_user.id,
+    #             username=current_user.username,
+    #             resource=user.username,
+    #             ip_address=request.client.host if request.client else None,
+    #             user_agent=request.headers.get("user-agent"),
+    #         ),
+    #     )
+    # except HTTPException:
+    #     create_audit_log(
+    #         session,
+    #             AuditLogCreate(
+    #             action=AuditAction.CREATE_USER,
+    #             status=AuditStatus.FAILED,
+    #             message="Username or email already exists",
+    #             user_id=current_user.id,
+    #             username=current_user.username,
+    #             resource=user.username,
+    #             ip_address=request.client.host if request.client else None,
+    #             user_agent=request.headers.get("user-agent"),
+    #         ),
+    #     )
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
@@ -178,19 +178,19 @@ def update_user(
 ):
     db_user = session.get(User, user_id)
     if not db_user:
-        create_audit_log(
-            session,
-            AuditLogCreate(
-                action=AuditAction.UPDATE_USER,
-                status=AuditStatus.FAILED,
-                message="Target user not found",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=str(user_id),
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     session,
+        #     AuditLogCreate(
+        #         action=AuditAction.UPDATE_USER,
+        #         status=AuditStatus.FAILED,
+        #         message="Target user not found",
+        #         user_id=current_user.id,
+        #         username=current_user.username,
+        #         resource=str(user_id),
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="User not found"
         )
@@ -227,20 +227,20 @@ def update_user(
             detail=f"Database error during update: {e}"
         )
 
-    create_audit_log(
-        session,
-        AuditLogCreate(
-            action=AuditAction.UPDATE_USER,
-            status=AuditStatus.SUCCESS,
-            message=f"User '{db_user.username}'"
-            f" updated by {current_user.username}",
-            user_id=current_user.id,
-            username=current_user.username,
-            resource=db_user.username,
-            ip_address=request.client.host if request.client else None,
-            user_agent=request.headers.get("user-agent"),
-        ),
-    )
+    # create_audit_log(
+    #     session,
+    #     AuditLogCreate(
+    #         action=AuditAction.UPDATE_USER,
+    #         status=AuditStatus.SUCCESS,
+    #         message=f"User '{db_user.username}'"
+    #         f" updated by {current_user.username}",
+    #         user_id=current_user.id,
+    #         username=current_user.username,
+    #         resource=db_user.username,
+    #         ip_address=request.client.host if request.client else None,
+    #         user_agent=request.headers.get("user-agent"),
+    #     ),
+    # )
 
     return db_user
 
@@ -263,37 +263,37 @@ def read_users_me(
                 detail="Invalid authentication token",
             )
     except ExpiredSignatureError:
-        create_audit_log(
-            session,
-            AuditLogCreate(
-                action=AuditAction.READ_CURRENT_USER,
-                status=AuditStatus.DENIED,
-                message="Invalid or expired token",
-                user_id=None,
-                username=None,
-                resource="/users/me",
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     session,
+        #     AuditLogCreate(
+        #         action=AuditAction.READ_CURRENT_USER,
+        #         status=AuditStatus.DENIED,
+        #         message="Invalid or expired token",
+        #         user_id=None,
+        #         username=None,
+        #         resource="/users/me",
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Token has expired",
         )
     except InvalidTokenError:
-        create_audit_log(
-            session,
-            AuditLogCreate(
-                action=AuditAction.READ_CURRENT_USER,
-                status=AuditStatus.DENIED,
-                message="Invalid or expired token",
-                user_id=None,
-                username=None,
-                resource="/users/me",
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     session,
+        #     AuditLogCreate(
+        #         action=AuditAction.READ_CURRENT_USER,
+        #         status=AuditStatus.DENIED,
+        #         message="Invalid or expired token",
+        #         user_id=None,
+        #         username=None,
+        #         resource="/users/me",
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Invalid authentication token",
@@ -301,19 +301,19 @@ def read_users_me(
 
     user = session.query(User).filter(User.username == username).first()
     if not user:
-        create_audit_log(
-            session,
-            AuditLogCreate(
-                action=AuditAction.READ_CURRENT_USER,
-                status=AuditStatus.FAILED,
-                message="User not found",
-                user_id=None,
-                username=None,
-                resource="/users/me",
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     session,
+        #     AuditLogCreate(
+        #         action=AuditAction.READ_CURRENT_USER,
+        #         status=AuditStatus.FAILED,
+        #         message="User not found",
+        #         user_id=None,
+        #         username=None,
+        #         resource="/users/me",
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="User not found"
         )

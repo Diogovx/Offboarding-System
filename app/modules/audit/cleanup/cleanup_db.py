@@ -4,8 +4,8 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.modules.audit.model import AuditLog
-from app.core.database import SessionLocal
-from app.core.security import RETENTION_POLICY
+from app.core import SessionLocal
+from .retention import RETENTION_POLICY
 
 
 def cleanup_audit_logs_db() -> int:

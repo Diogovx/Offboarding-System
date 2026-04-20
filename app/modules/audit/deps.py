@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.schemas import AuditLogListFilters
+from .schemas import AuditLogListFilters
 
 
 def audit_log_list_filters(

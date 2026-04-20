@@ -4,8 +4,8 @@ from datetime import datetime
 from email.message import EmailMessage
 from zoneinfo import ZoneInfo
 
-from app.enums import EmailActions
-from app.core.config import settings
+from .email_actions import EmailActions
+from app.core import settings
 
 
 

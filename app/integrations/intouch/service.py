@@ -2,8 +2,8 @@ from http import HTTPStatus
 
 import requests
 from logging import getLogger
-from app.core.config import settings
-from app.schemas import (
+from app.core import settings
+from .schemas import (
     InTouchUserSearchModel,
     InTouchActivateUserModel,
     InTouchDeactivateUserModel

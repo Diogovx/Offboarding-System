@@ -4,11 +4,11 @@ from fastapi import APIRouter, HTTPException, Request, status
 
 from app.modules.audit.service import create_audit_log
 from app.core.database import Db_session
-from app.enums import AuditAction, AuditStatus
-from app.models import ADUser, DisableUserRequest
-from app.schemas import AuditLogCreate
-from app.core.security import Current_user
-from app.services import ADServiceDep
+#from app.enums import AuditAction, AuditStatus
+from .schemas import ADUser, DisableUserRequest
+#from app.schemas import AuditLogCreate
+from app.core import Current_user
+from .deps import ADServiceDep
 
 logger = getLogger(__name__)
 
@@ -30,19 +30,19 @@ async def get_user(
         )
         users = ad_service.search_users(registration=registration)
 
-        create_audit_log(
-            db,
-            AuditLogCreate(
-                action=AuditAction.SEARCH_AD_USER,
-                status=AuditStatus.SUCCESS,
-                message=f"User research conducted - {len(users)} founded",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=registration or "*",
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+#        create_audit_log(
+#            db,
+#            AuditLogCreate(
+#                action=AuditAction.SEARCH_AD_USER,
+#                status=AuditStatus.SUCCESS,
+#                message=f"User research conducted - {len(users)} founded",
+#                user_id=current_user.id,
+#                username=current_user.username,
+#                resource=registration or "*",
+#                ip_address=request.client.host if request.client else None,
+#                user_agent=request.headers.get("user-agent"),
+#            ),
+#       )
 
         logger.info(
             f"Found {len(users)} users for registration={registration}"
@@ -53,36 +53,36 @@ async def get_user(
     except HTTPException as e:
         logger.warning(f"HTTP error searching AD: {e.detail}")
 
-        create_audit_log(
-            db,
-            AuditLogCreate(
-                action=AuditAction.SEARCH_AD_USER,
-                status=AuditStatus.FAILED,
-                message=f"Search Failed: {e.detail}",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=registration or "*",
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     db,
+        #     AuditLogCreate(
+        #         action=AuditAction.SEARCH_AD_USER,
+        #         status=AuditStatus.FAILED,
+        #         message=f"Search Failed: {e.detail}",
+        #         user_id=current_user.id,
+        #         username=current_user.username,
+        #         resource=registration or "*",
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise
     except Exception as e:
         logger.error(f"Unexpected error searching AD: {e}", exc_info=True)
 
-        create_audit_log(
-            db,
-            AuditLogCreate(
-                action=AuditAction.SEARCH_AD_USER,
-                status=AuditStatus.FAILED,
-                message=f"Unexpected error: {str(e)}",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=registration or "*",
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     db,
+        #     AuditLogCreate(
+        #         action=AuditAction.SEARCH_AD_USER,
+        #         status=AuditStatus.FAILED,
+        #         message=f"Unexpected error: {str(e)}",
+        #         user_id=current_user.id,
+        #         username=current_user.username,
+        #         resource=registration or "*",
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -106,19 +106,19 @@ async def disable_user(
         )
         user = ad_service.disable_user(payload)
 
-        create_audit_log(
-            db,
-            AuditLogCreate(
-                action=AuditAction.DISABLE_AD_USER,
-                status=AuditStatus.SUCCESS,
-                message=f"User '{user.user.sam_account_name}' ({user.user.name}) deactivated successfully by {payload.performed_by}",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=payload.registration,
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     db,
+        #     AuditLogCreate(
+        #         action=AuditAction.DISABLE_AD_USER,
+        #         status=AuditStatus.SUCCESS,
+        #         message=f"User '{user.user.sam_account_name}' ({user.user.name}) deactivated successfully by {payload.performed_by}",
+        #         user_id=current_user.id,
+        #         username=current_user.username,
+        #         resource=payload.registration,
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
 
         logger.info(f"User {user.user.sam_account_name} successfully disabled")
 
@@ -130,19 +130,19 @@ async def disable_user(
             f"{e.status_code} - {e.detail}"
         )
 
-        create_audit_log(
-            db,
-            AuditLogCreate(
-                action=AuditAction.DISABLE_AD_USER,
-                status=AuditStatus.FAILED,
-                message=f"Failed to disable user: {e.detail}",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=payload.registration,
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     db,
+        #     AuditLogCreate(
+        #         action=AuditAction.DISABLE_AD_USER,
+        #         status=AuditStatus.FAILED,
+        #         message=f"Failed to disable user: {e.detail}",
+        #         user_id=current_user.id,
+        #         username=current_user.username,
+        #         resource=payload.registration,
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise
 
     except Exception as e:
@@ -151,19 +151,19 @@ async def disable_user(
             exc_info=True
         )
 
-        create_audit_log(
-            db,
-            AuditLogCreate(
-                action=AuditAction.DISABLE_AD_USER,
-                status=AuditStatus.FAILED,
-                message=f"Failed to disable user: {type(e).__name__}",
-                user_id=current_user.id,
-                username=current_user.username,
-                resource=payload.registration,
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
+        # create_audit_log(
+        #     db,
+        #     AuditLogCreate(
+        #         action=AuditAction.DISABLE_AD_USER,
+        #         status=AuditStatus.FAILED,
+        #         message=f"Failed to disable user: {type(e).__name__}",
+        #         user_id=current_user.id,
+        #         username=current_user.username,
+        #         resource=payload.registration,
+        #         ip_address=request.client.host if request.client else None,
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error disabling user in Active Directory"

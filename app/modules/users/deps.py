@@ -6,8 +6,8 @@ from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import User
-from app.core.config.config import settings
+from .model import User
+from app.core.config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
