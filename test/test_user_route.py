@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.infra.security import create_access_token
+from app.core.security import create_access_token
 
 
 @pytest.fixture

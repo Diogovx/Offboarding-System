@@ -10,7 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.engine.reflection import Inspector
-from app.models.user_model import SqliteUUID
+from app.modules.users.model import SqliteUUID
 
 
 # revision identifiers, used by Alembic.
