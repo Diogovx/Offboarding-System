@@ -4,7 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.models import table_registry, RevokedAccess, OffboardingRecord
-from app.config import Settings
+from app.core.config import Settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

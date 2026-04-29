@@ -7,13 +7,14 @@ from fastapi.concurrency import run_in_threadpool
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from app.services import intouch_service, ADService
+from app.integrations.intouch import service
+from app.services import ADService
 
 async def verify_v1_old(registration: str):
     ad_service = ADService()
     
     ad_response = await run_in_threadpool(ad_service.search_users, registration=registration)
-    intouch_data = await run_in_threadpool(intouch_service.search_user, registration=registration)
+    intouch_data = await run_in_threadpool(service.search_user, registration=registration)
     
     return bool(ad_response), bool(intouch_data)
 
@@ -21,7 +22,7 @@ async def verify_v2_new(registration: str):
     ad_service = ADService()
     
     task_ad = run_in_threadpool(ad_service.search_users, registration=registration)
-    task_intouch = run_in_threadpool(intouch_service.search_user, registration=registration)
+    task_intouch = run_in_threadpool(service.search_user, registration=registration)
     
     ad_response, intouch_data = await asyncio.gather(task_ad, task_intouch)
     

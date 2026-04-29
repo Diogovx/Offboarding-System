@@ -1,0 +1,99 @@
+from http import HTTPStatus
+
+from fastapi import APIRouter, HTTPException, Request
+
+from app.core.database import Db_session
+#from app.enums import AuditAction, AuditStatus
+from app.modules.users.model import User
+#from app.schemas import AuditLogCreate
+from app.core import (
+    Current_user,
+    create_access_token,
+    verify_password,
+)
+from .deps import Form_data
+#from app.services import create_audit_log
+from slowapi import Limiter
+
+
+def get_client_ip(request: Request) -> str:
+    if x_forwarded_for := request.headers.get("X-Forwarded-For"):
+        real_ip = x_forwarded_for.split(",")[0].strip()
+        if real_ip and real_ip != "127.0.0.1":
+            return real_ip
+    if x_real_ip := request.headers.get("X-Real-IP"):
+        if x_real_ip != "127.0.0.1":
+            return x_real_ip
+    return request.client.host if request.client else "127.0.0.1"
+
+
+router = APIRouter()
+limiter = Limiter(key_func=get_client_ip)
+
+
+@router.post("/token")
+@limiter.limit("5/minute")
+def login(
+    db: Db_session,
+    request: Request,
+    form_data: Form_data,
+):
+    user = db.query(User).filter(User.username == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.password):
+        # create_audit_log(
+        #     db,
+        #     AuditLogCreate(
+        #         action=AuditAction.SYSTEM_LOGIN,
+        #         status=AuditStatus.FAILED,
+        #         message="Invalid credentials",
+        #         user_id=user.id if user else None,
+        #         username=form_data.username,
+        #         resource="/auth/token",
+        #         ip_address=get_client_ip(request),
+        #         user_agent=request.headers.get("user-agent"),
+        #     ),
+        # )
+        pass
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid credentials"
+        )
+
+    # create_audit_log(
+    #         db,
+    #         AuditLogCreate(
+    #             action=AuditAction.SYSTEM_LOGIN,
+    #             status=AuditStatus.SUCCESS,
+    #             message="User logged in successfully",
+    #             user_id=user.id if user else None,
+    #             username=form_data.username,
+    #             resource="/auth/token",
+    #             ip_address=get_client_ip(request),
+    #             user_agent=request.headers.get("user-agent"),
+    #         ),
+    #     )
+
+    access_token = create_access_token({"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/logout")
+def logout(
+    db: Db_session,
+    request: Request,
+    session: Current_user,
+):
+    # create_audit_log(
+    #     db,
+    #     AuditLogCreate(
+    #         action=AuditAction.SYSTEM_LOGOUT,
+    #         status=AuditStatus.SUCCESS,
+    #         message="User logged out",
+    #         user_id=session.id,
+    #         username=session.username,
+    #         resource="/auth/logout",
+    #         ip_address=get_client_ip(request),
+    #         user_agent=request.headers.get("user-agent"),
+    #     ),
+    # )
+
+    return {"detail": "Logged out successfully"}
