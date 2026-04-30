@@ -126,7 +126,7 @@ def search_user(registration: str) -> InTouchUserSearchModel:
         role=raw_user.get('position'),
         current_status=status,
         is_active=status in ACTIVE_STATUSES,
-        registration=registration,
+        registration=base_registration,
     )
 
 async def activate_user_intouch(registration: str) -> InTouchActivateUserModel:
