@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import re
 
 import requests
 from logging import getLogger
@@ -41,21 +42,48 @@ def search_user(registration: str) -> InTouchUserSearchModel:
     if err := _validate_config():
         return InTouchUserSearchModel(error=str(err), registration="")
 
-    filter = f'profile.employeeid eq "{registration}"'
+
+    #adding regex to clean registration
+
+    base_registration = re.sub(r'\D', '', registration).lstrip('0')
+
+    if not base_registration:
+        return InTouchUserSearchModel(
+            success=False,
+            found=False,
+            error="Invalid registration format."
+        )
+    
+    padded_num = base_registration.zfill(6)
+
+    filter_query = (
+
+        f'profile.employeeid eq "{base_registration}" or '
+        f'profile.employeeid eq "{padded_num}" or '
+        f'profile.employeeid eq "ctb{base_registration}" or '
+        f'profile.employeeid eq "ctb{padded_num}" or '
+        f'profile.employeeid eq "CTB{padded_num}"'
+    )
 
     try:
+
         response = requests.get(
             settings.INTOUCH_URL,
-            params={"filter": filter},
+            params={
+                "filter": filter_query,
+                "query": "CTB" # i searched for the location directly using the staffbase parameter
+            },
             headers=_get_headers(),
             timeout=10
-        )
+            )
+        
     except requests.RequestException as e:
         logger.error(f"Intouch connection error: {e}")
         return InTouchUserSearchModel(
             success=False,
             error=f"Connection error: {str(e)}"
         )
+
 
     if response.status_code != HTTPStatus.OK:
         return InTouchUserSearchModel(
@@ -77,21 +105,13 @@ def search_user(registration: str) -> InTouchUserSearchModel:
         return InTouchUserSearchModel(
             success=False,
             found=False,
-            error="User not found."
-        )
-    raw_user = None
-    for user in list_users:
-        if user.get("location") == 'CTB':
-            raw_user = user
-            break
-    if not raw_user:
-        return InTouchUserSearchModel(
-            success=False,
-            found=False,
             error=(
-                "A collaborator was found, but does not belong to the CTB unit"
+                "User not found or does not belong to the CTB unit." # changing responsability to check
                 )
         )
+    
+    raw_user = list_users[0]
+
     status = raw_user.get('status')
     first_name = raw_user.get('firstName', '')
     last_name = raw_user.get('lastName', '')
@@ -108,7 +128,6 @@ def search_user(registration: str) -> InTouchUserSearchModel:
         is_active=status in ACTIVE_STATUSES,
         registration=registration,
     )
-
 
 async def activate_user_intouch(registration: str) -> InTouchActivateUserModel:
 
