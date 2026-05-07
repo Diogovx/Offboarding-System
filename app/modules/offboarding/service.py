@@ -49,9 +49,14 @@ async def verify_services(
     try:
         ad_response, intouch_data, snipeit_assets = await asyncio.wait_for(
             asyncio.gather(
-                run_in_threadpool(ad_service.search_users, registration=registration),
-                run_in_threadpool(intouch_service.search_user, registration=registration),
+                run_in_threadpool(
+                    ad_service.search_users, registration=registration
+                ),
+                run_in_threadpool(
+                    intouch_service.search_user, registration=registration
+                ),
                 snipeit_service.search_assets_by_user(registration),
+                return_exceptions=True,
             ),
             timeout=10.0,
         )
@@ -64,15 +69,24 @@ async def verify_services(
 
     service_map: dict[str, bool] = {}
 
-    if not isinstance(ad_response, Exception) and ad_response:
+    if not isinstance(ad_response, BaseException) and ad_response:
         service_map[OffboardingSystem.NETWORK] = bool(ad_response[0].enabled)
+    elif isinstance(ad_response, BaseException):
+        logger.error(f"Falha ao buscar AD: {ad_response}")
 
-    if not isinstance(intouch_data, Exception) and intouch_data and intouch_data.success:
+    if (
+        not isinstance(intouch_data, BaseException)
+        and intouch_data
+        and intouch_data.success
+    ):
         service_map[OffboardingSystem.INTOUCH] = bool(intouch_data.is_active)
+    elif isinstance(intouch_data, BaseException):
+        logger.error(f"Falha ao buscar InTouch: {intouch_data}")
 
-    service_map[OffboardingSystem.EQUIPMENT] = (
-        not isinstance(snipeit_assets, Exception) and bool(snipeit_assets)
-    )
+    if not isinstance(snipeit_assets, BaseException) and snipeit_assets:
+        service_map[OffboardingSystem.EQUIPMENT] = True
+    elif isinstance(snipeit_assets, BaseException):
+        logger.error(f"Falha de conexão com o Snipe-IT: {snipeit_assets}")
 
     logger.info(f"Active services for {registration}: {service_map}")
     return service_map
