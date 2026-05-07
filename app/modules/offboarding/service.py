@@ -1,5 +1,3 @@
-# app/modules/offboarding/service.py
-
 import asyncio
 import logging
 
