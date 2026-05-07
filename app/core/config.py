@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     TURNSTILE_A_SESSION: str = ""
     TURNSTILE_B_URL: str = ""
     TURNSTILE_B_SESSION: str = ""
+    SNIPEIT_API_KEY: str = "your_api_key_here"
+    SNIPEIT_BASE_URL: str = "your_url_here"
 
 
 @lru_cache
