@@ -122,7 +122,7 @@ async def verify_services_before_disabling(
     if ad_response and len(ad_response) > 0:
         ad_user = ad_response[0]
         enabled = ad_user.enabled
-        service_map['Rede'] = bool(enabled)
+        service_map['Network'] = bool(enabled)
 
     if intouch_data and intouch_data.success:
         service_map["InTouch"] = bool(intouch_data.is_active)
