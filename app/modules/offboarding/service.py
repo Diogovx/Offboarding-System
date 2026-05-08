@@ -259,7 +259,7 @@ async def execute_offboarding(
             #     req=req
             # )
 
-    if services_map.get("Rede") is True:
+    if services_map.get("Network") is True:
         try:
             payload_ad = DisableUserRequest(
                 registration=registration,
@@ -267,7 +267,7 @@ async def execute_offboarding(
             )
             res_ad = await run_in_threadpool(ad_service.disable_user, payload_ad)
             if res_ad.action == "disabled":
-                successfully_revoked.append("Rede")
+                successfully_revoked.append("Network")
                 # _audit(
                 #     session=session,
                 #     action=AuditAction.DISABLE_AD_USER,
@@ -279,7 +279,7 @@ async def execute_offboarding(
                 #     req=req
                 # )
             elif res_ad.action == "already_disabled":
-                successfully_revoked.append("Rede")
+                successfully_revoked.append("Network")
                 logger.warning(
                     f"AD state mismatch for {registration}: "
                     "verify_services reported active but disable_user found already disabled. "

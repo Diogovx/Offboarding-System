@@ -29,9 +29,9 @@ createApp({
 
         const availableActions = ref([
             {label: 'Login', value: 'system_login'},
-            {label: 'Offboarding (Rede)', value: 'disable_ad_user'},
+            {label: 'Offboarding (Network)', value: 'disable_ad_user'},
             {label: 'Offboarding (InTouch)', value: 'disable_intouch_user'},
-            {label: 'Offboarding (Catraca)', value: 'disable_turnstile_user'},
+            {label: 'Offboarding (Gate)', value: 'disable_turnstile_user'},
             {label: 'Criação de usuário', value: 'create_user'},
             {label: 'Atualização de usuário', value: 'update_user'},
             {label: 'Exportação de registros', value: 'export_audit_logs'},
@@ -40,7 +40,7 @@ createApp({
         const actionLabels = {
             system_login: 'Login',
             system_logout: 'Logout',
-            disable_ad_user: 'Offboarding (Rede)',
+            disable_ad_user: 'Offboarding (Network)',
             list_users: 'Usuários listados',
             create_user: 'Usuário criado',
             update_user: 'Usuário atualizado',
