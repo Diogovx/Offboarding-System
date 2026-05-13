@@ -43,4 +43,3 @@ app.include_router(intouch_router.router)
 app.include_router(offboarding_router.router)
 
 app.mount("/app", StaticFiles(directory="app"), name="app")
-app.mount("/pages", StaticFiles(directory="pages"), name="pages")
