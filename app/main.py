@@ -34,6 +34,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# routers for different integrations
+
 app.include_router(health.router)
 app.include_router(auth_router.router)
 app.include_router(user_router.router)
