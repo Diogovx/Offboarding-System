@@ -5,7 +5,7 @@ from collections.abc import Iterable
 ACTION_LABELS = {
     "system_login": "Login",
     "system_logout": "Logout",
-    "disable_ad_user": "Offboarding (Rede)",
+    "disable_ad_user": "Offboarding (Network)",
     "list_users": "Usuários listados",
     "create_user": "Usuário criado",
     "update_user": "Usuário atualizado",
