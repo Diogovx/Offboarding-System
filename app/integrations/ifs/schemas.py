@@ -1,16 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class IFSUserResponse(BaseModel):
-    success: bool = False
-    found: bool = False
-    id_system: str | None = None
+    
+    context: str | None = Field(None, alias="@odata.context")
+    etag: str | None = Field(None, alias="@odata.etag")
+    
+    Identity: str
+    Description: str | None = None
+    Active: str | None = None
+    ValidFrom: str | None = None
+    ValidTo: str | None = None
+    success: bool = True
+    found: bool = True
+
+class IFSUserRequest(BaseModel):
     Etag: str | None = None
-    name: str = ""
     Identify: str | None = None
     Description: str | None = None
-    current_status: str | None = None
-    is_active: bool = False
-    error: str | None = None
+    Active: str | None = None
     validFrom: str = ""
     validTo: str = ""
 
