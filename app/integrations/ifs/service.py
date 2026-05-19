@@ -2,7 +2,7 @@ import logging
 import asyncio # to test
 import httpx
 from app.core.config import settings
-from app.integrations.ifs.schemas import IFSTokenResponse, IFSTokenRequest, IFSUserResponse
+from app.integrations.ifs.schemas import IFSTokenResponse, IFSTokenRequest, IFSUserResponse, IFSUserRequest, IFSPathResponse 
 
 logger = logging.getLogger(__name__)
 
@@ -61,3 +61,6 @@ class IFSService:
 
         user_data = IFSUserResponse(**response.json())
         return user_data
+    
+   ## async def _path_user_ifs(self, registration: str, active: bool, client: httpx.AsyncClient)
+   ## 8585
