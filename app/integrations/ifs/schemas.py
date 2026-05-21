@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 
 class IFSUserResponse(BaseModel):
-    
     context: str | None = Field(None, alias="@odata.context")
     etag: str | None = Field(None, alias="@odata.etag")
     
@@ -12,6 +11,11 @@ class IFSUserResponse(BaseModel):
     ValidTo: str | None = None
     success: bool = True
     found: bool = True
+
+    # be boolean
+    @property
+    def is_active(self) -> bool:
+        return self.Active == "TRUE"
 
 class IFSUserRequest(BaseModel):
     Etag: str | None = None
