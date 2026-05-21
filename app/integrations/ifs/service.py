@@ -1,5 +1,5 @@
 import logging
-import asyncio # to test
+import asyncio 
 import httpx
 from app.core.config import settings
 
@@ -76,7 +76,7 @@ class IFSService:
         if not self._token:
             await self._get_token_ifs(client) 
 
-        logger.info(f"Searching for a collaborator for IFS: {registration}")
+        logger.info(f"Searching for a collaborator in IFS: {registration}")
 
         search_headers = {
             "Authorization": f"Bearer {self._token}",
@@ -117,3 +117,52 @@ class IFSService:
         response.raise_for_status()
 
         return response.status_code in (200, 204)
+    
+    async def disable_employee(self, registration: str, client: httpx.AsyncClient) -> bool:
+        """
+        Orchestrates the entire IFS deactivation process:
+        1. Finds the PersonId.
+        2. Retrieves the User Identity and ETag.
+        3. Sends the PATCH request to deactivate.
+        """
+        try:
+            person_result = await self._get_person_user_ifs(registration, client)
+
+            if not person_result.value:
+                logger.warning(f"IFS Deactivation: No user found for registration {registration}")
+                return False
+            
+            person_id = person_result.value[0].PersonId
+           
+            user_data = await self._get_user_ifs(person_id, client)
+
+            success = await self._patch_user_ifs(
+                registration=person_id,
+                etag=user_data.etag,
+                active=False,
+                client=client
+            )
+            return success
+
+        except Exception as e:
+            logger.error(f"Failed to deactivate user {registration} in IFS: {str(e)}")
+            return False
+        
+    async def search_user(self, registration: str) -> bool:
+        """
+        Verifies if the user exists and is active in IFS.
+        Manages its own HTTP connection to be used independently.
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                person_result = await self._get_person_user_ifs(registration, client)
+                if not person_result.value:
+                    return False
+                    
+                person_id = person_result.value[0].PersonId
+                user = await self._get_user_ifs(person_id, client)
+                
+                return user.is_active 
+        except Exception as e:
+            logger.error(f"Error fetching user status in IFS for {registration}: {e}")
+            return False
