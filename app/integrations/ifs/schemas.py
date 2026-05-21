@@ -38,3 +38,14 @@ class IFSTokenResponse(BaseModel):
     id_token: str | None = None
     token_type: str
     expires_in: int | str 
+
+class IFSPersonItem(BaseModel):
+    PersonId: str 
+    AlternativeName: str | None = None
+
+class IFSPersonUserResponse(BaseModel):
+    value: list[IFSPersonItem] = []
+
+class IFSDesactiveUserRequest(BaseModel):
+    Active: str
+    
