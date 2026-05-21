@@ -8,3 +8,4 @@ class OffboardingSystem(StrEnum):
     INTOUCH = "InTouch"
     EQUIPMENT = "Equipamentos"
     ACCESS = "Acesso"
+    IFS = "IFS"

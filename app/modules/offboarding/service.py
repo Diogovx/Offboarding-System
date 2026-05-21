@@ -10,6 +10,7 @@ from app.integrations.active_directory import ADService
 from app.integrations.intouch import service as intouch_service
 from app.integrations.snipe_it import SnipeItService
 from app.modules.shared import EmailActions, email_service
+from app.integrations.ifs.service import IFSService
 
 from .enums import OffboardingSystem
 from .repository import create_offboarding_record, get_offboarding_history
@@ -22,6 +23,7 @@ from .use_cases.checkin_assets import checkin_assets
 from .use_cases.disable_intouch_access import disable_intouch_access
 from .use_cases.disable_ad_access import disable_ad_account
 from .use_cases.disable_gateway_access import disable_gateway_access
+from .use_cases.disable_ifs_access import disable_ifs_access, check_ifs_status
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,8 @@ async def verify_services(
     ad_service = ADService()
 
     try:
-        ad_response, intouch_data, snipeit_assets = await asyncio.wait_for(
+
+        ad_response, intouch_data, snipeit_assets, ifs_is_active = await asyncio.wait_for(
             asyncio.gather(
                 run_in_threadpool(
                     ad_service.search_users, registration=registration
@@ -56,6 +59,7 @@ async def verify_services(
                     intouch_service.search_user, registration=registration
                 ),
                 snipeit_service.search_assets_by_user(registration),
+                check_ifs_status(registration), 
                 return_exceptions=True,
             ),
             timeout=10.0,
@@ -82,6 +86,11 @@ async def verify_services(
         service_map[OffboardingSystem.INTOUCH] = bool(intouch_data.is_active)
     elif isinstance(intouch_data, BaseException):
         logger.error(f"Falha ao buscar InTouch: {intouch_data}")
+
+    if not isinstance(ifs_is_active, BaseException) and ifs_is_active:
+        service_map[OffboardingSystem.IFS] = True
+    elif isinstance(ifs_is_active, BaseException):
+        logger.error(f"Falha de conexão com o IFS: {ifs_is_active}")
 
     if not isinstance(snipeit_assets, BaseException) and snipeit_assets:
         service_map[OffboardingSystem.EQUIPMENT] = True
@@ -158,6 +167,11 @@ async def execute_offboarding(
     if services_map.get(OffboardingSystem.INTOUCH):
         if await disable_intouch_access(**shared):  # type: ignore
             successfully_revoked.append(OffboardingSystem.INTOUCH)
+
+    # IFS
+    if services_map.get(OffboardingSystem.IFS):
+        if await disable_ifs_access(**shared):  # type: ignore
+            successfully_revoked.append(OffboardingSystem.IFS)
 
     # Active Directory — last, intentionally
     if services_map.get(OffboardingSystem.NETWORK):

@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     TURNSTILE_B_SESSION: str = ""
     SNIPEIT_API_KEY: str = "your_api_key_here"
     SNIPEIT_BASE_URL: str = "your_url_here"
+    IFS_BASE_URL: str = ""
+    IFS_USERNAME: str = "username_here"
+    IFS_PASSWORD: str = "password_here"
+    IFS_CLIENT_ID: str = ""
+    IFS_CLIENT_SECRET: str = ""
 
 
 @lru_cache
