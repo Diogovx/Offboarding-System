@@ -2,7 +2,15 @@ import logging
 import asyncio # to test
 import httpx
 from app.core.config import settings
-from app.integrations.ifs.schemas import IFSTokenResponse, IFSTokenRequest, IFSUserResponse, IFSUserRequest, IFSPathResponse 
+
+from app.integrations.ifs.schemas import (
+    IFSTokenResponse, 
+    IFSTokenRequest, 
+    IFSUserResponse, 
+    IFSUserRequest, 
+    IFSPersonUserResponse,
+    IFSDesactiveUserRequest 
+)
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +19,6 @@ class IFSService:
     def __init__(self, base_url: str): 
         self.base_url = base_url.rstrip("/")
         self._token = None
-
         self.headers = {}   
 
     async def _get_token_ifs(self, client: httpx.AsyncClient) -> str:
@@ -27,7 +34,7 @@ class IFSService:
             client_secret=settings.IFS_CLIENT_SECRET
         )
 
-        logger.info("Find id_token...")
+        logger.info("Searching for id_token...")
 
         token_headers = {
             "Accept": "application/json",
@@ -42,6 +49,26 @@ class IFSService:
 
         return self._token
     
+    async def _get_person_user_ifs(self, registration: str, client: httpx.AsyncClient) -> IFSPersonUserResponse:
+        
+        url = f"{self.base_url}/main/ifsapplications/projection/v1/PersonHandling.svc/PersonInfoSet?$filter=AlternativeName%20eq%20'{registration}'"
+
+        if not self._token:
+            await self._get_token_ifs(client) 
+
+        logger.info(f"Searching PersonId for registration: {registration}")
+
+        person_header = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {self._token}"
+        }
+
+        response = await client.get(url, headers=person_header)
+        response.raise_for_status()
+
+        person_data = IFSPersonUserResponse(**response.json())
+        return person_data
+    
     async def _get_user_ifs(self, registration: str, client: httpx.AsyncClient) -> IFSUserResponse:
         
         url = f"{self.base_url}/main/ifsapplications/projection/v1/UserRelatedData.svc/Reference_FndUser(Identity='{registration}')"
@@ -49,7 +76,7 @@ class IFSService:
         if not self._token:
             await self._get_token_ifs(client) 
 
-        logger.info(f"Buscando colaborador no IFS: {registration}")
+        logger.info(f"Searching for a collaborator for IFS: {registration}")
 
         search_headers = {
             "Authorization": f"Bearer {self._token}",
@@ -61,6 +88,32 @@ class IFSService:
 
         user_data = IFSUserResponse(**response.json())
         return user_data
-    
-   ## async def _path_user_ifs(self, registration: str, active: bool, client: httpx.AsyncClient)
-   ## 8585
+
+    async def _patch_user_ifs(self, registration: str, etag: str, active: bool, client: httpx.AsyncClient) -> bool:
+        
+        url = f"{self.base_url}/main/ifsapplications/projection/v1/UserRelatedData.svc/Reference_FndUser(Identity='{registration}')"
+
+        if not self._token:
+            await self._get_token_ifs(client) 
+
+        logger.info(f"Updating employee {registration} to status = {active}")
+
+        patch_headers = {
+            "Authorization": f"Bearer {self._token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "If-Match": etag              
+        }
+
+        status_string = str(active).upper()
+        payload = IFSDesactiveUserRequest(Active=status_string)
+
+        response = await client.patch(
+            url, 
+            headers=patch_headers, 
+            json=payload.model_dump() 
+        )
+        
+        response.raise_for_status()
+
+        return response.status_code in (200, 204)
