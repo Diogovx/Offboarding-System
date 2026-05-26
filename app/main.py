@@ -9,6 +9,7 @@ from app.core.database import init_db
 from app.integrations.active_directory import aduser_router
 from app.integrations.intouch import intouch_router
 from app.modules.offboarding import router as offboarding_router
+from app.modules.onboarding import router as onboarding_router
 from app.core import health
 from app.modules.users import user_router
 from app.modules.users import (
@@ -41,5 +42,6 @@ app.include_router(aduser_router.router)
 app.include_router(audit_router.router)
 app.include_router(intouch_router.router)
 app.include_router(offboarding_router.router)
+app.include_router(onboarding_router.router)
 
 app.mount("/app", StaticFiles(directory="app"), name="app")
