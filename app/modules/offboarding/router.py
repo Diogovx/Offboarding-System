@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, Response
 
 from app.core.database import Db_session
-from app.core import Current_user
+from app.modules.users import Current_user
 from app.integrations.active_directory import ADServiceDep
 from app.integrations.snipe_it import (
     CheckinAssetRequest,
