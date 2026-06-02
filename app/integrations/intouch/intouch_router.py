@@ -3,7 +3,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 #from app.enums import EmailActions
-from app.core import Current_user
+from app.modules.users import Current_user
 from app.integrations.intouch import service
 from app.modules.shared.email_service import send_email
 

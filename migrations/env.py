@@ -3,7 +3,12 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from app.models import table_registry, RevokedAccess, OffboardingRecord
+from app.modules.users.model import *        # noqa
+from app.modules.audit.model import *        # noqa
+from app.modules.offboarding.model import *  # noqa
+from app.modules.onboarding.model import *  # noqa
+
+from app.core.database import table_registry
 from app.core.config import Settings
 
 # this is the Alembic Config object, which provides

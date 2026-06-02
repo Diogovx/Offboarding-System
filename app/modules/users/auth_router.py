@@ -7,11 +7,10 @@ from app.core.database import Db_session
 from app.modules.users.model import User
 #from app.schemas import AuditLogCreate
 from app.core import (
-    Current_user,
     create_access_token,
     verify_password,
 )
-from .deps import Form_data
+from .deps import Form_data, Current_user
 #from app.services import create_audit_log
 from slowapi import Limiter
 

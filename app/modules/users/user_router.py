@@ -17,12 +17,8 @@ from .schemas import (
     UserList,
     UserPublic,
 )
-from app.core import (
-    Current_user,
-    Editor_user,
-    get_password_hash,
-)
-from .deps import Token
+from app.core import get_password_hash
+from .deps import Token, Current_user, Editor_user
 from app.core.config import settings
 #from app.services import create_audit_log
 

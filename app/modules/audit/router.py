@@ -12,7 +12,7 @@ from .schemas import (
     AuditLogList,
     AuditLogExportedStatus
 )
-from app.core import Admin_user
+from app.modules.users import Admin_user
 from .deps import Audit_log_list_filters
 from .service import (
     create_audit_log,

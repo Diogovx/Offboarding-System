@@ -7,7 +7,7 @@ from app.core.database import Db_session
 #from app.enums import AuditAction, AuditStatus
 from .schemas import ADUser, DisableUserRequest
 #from app.schemas import AuditLogCreate
-from app.core import Current_user
+from app.modules.users import Current_user
 from .deps import ADServiceDep
 
 logger = getLogger(__name__)
