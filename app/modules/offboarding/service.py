@@ -173,7 +173,7 @@ async def execute_offboarding(
         if await disable_ifs_access(**shared):  # type: ignore
             successfully_revoked.append(OffboardingSystem.IFS)
 
-    # Active Directory — last, intentionally
+    # Active Directory
     if services_map.get(OffboardingSystem.NETWORK):
         if await disable_ad_account(**shared, ad_service=ad_service):  # type: ignore
             successfully_revoked.append(OffboardingSystem.NETWORK)
