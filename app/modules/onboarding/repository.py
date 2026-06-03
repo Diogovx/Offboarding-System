@@ -1,5 +1,3 @@
-# app/modules/onboarding/repository.py
-
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 

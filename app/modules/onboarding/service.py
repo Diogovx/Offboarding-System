@@ -1,8 +1,10 @@
-# app/modules/onboarding/service.py
-
+from fastapi import Request
 import logging
 from sqlalchemy.orm import Session
-
+from app.modules.audit.service import create_audit_log
+from app.modules.audit.schemas import AuditLogCreate
+from app.modules.audit.enums import AuditAction, AuditStatus
+from app.modules.users import Current_user
 from .enums import ItemStatus, OnboardingStatus
 from .repository import (
     complete_item,
@@ -22,7 +24,9 @@ logger = logging.getLogger(__name__)
 def create_onboarding_checklist(
     session: Session,
     data: ChecklistCreate,
+    request: Request,
     created_by_id,
+    created_by_name,
 ) -> ChecklistRead:
     """Creates a new onboarding checklist on behalf of an HR user.
 
@@ -35,6 +39,39 @@ def create_onboarding_checklist(
         ChecklistRead: Full serialized checklist.
     """
     checklist = create_checklist(session, data, created_by_id)
+    try:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.CREATE_CHECKLIST,
+                status=AuditStatus.SUCCESS,
+                message=f"Checklist of {checklist.employee_name} created",
+                user_id=created_by_id,
+                username=created_by_name,
+                target_username=data.employee_name,
+                target_registration=data.employee_registration,
+                resource=str(checklist.id),
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            )
+        )
+    except Exception as e:
+        create_audit_log(
+            session,
+            AuditLogCreate(
+                action=AuditAction.CREATE_CHECKLIST,
+                status=AuditStatus.FAILED,
+                message=f"Checklist creation failed: {e}",
+                user_id=created_by_id,
+                username=created_by_name,
+                target_username=data.employee_name,
+                target_registration=data.employee_registration,
+                resource=str(checklist.id),
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            )
+        )
+
     logger.info(
         f"Checklist created for {data.employee_registration} "
         f"by {created_by_id} — {len(data.items)} system items."

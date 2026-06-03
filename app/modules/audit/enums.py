@@ -17,7 +17,15 @@ class AuditAction(str, Enum):
     SEARCH_INTOUCH_USER = "search_intouch_user"
     DISABLE_INTOUCH_USER = "disable_intouch_user"
 
+    CHECKIN_ASSET = "checkin_asset"
+    GENERATE_TERM = "generate_term"
+
+    DISABLE_IFS_USER = "disable_ifs_user"
+
     DISABLE_TURNSTILE_USER = "disable_turnstile_user"
+
+    CREATE_CHECKLIST = "create_checklist"
+    CHECK_TASK = "check_task"
 
     VIEW_AUDIT_LOGS = "view_audit_logs"
     EXPORT_AUDIT_LOGS = "export_audit_logs"

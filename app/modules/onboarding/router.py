@@ -1,7 +1,5 @@
-# app/modules/onboarding/router.py
-
 import logging
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 
 from app.modules.users import Current_user
 from app.core.database import Db_session
@@ -33,6 +31,7 @@ router = APIRouter(prefix="/onboarding", tags=["onboarding"])
 def create_checklist(
     data: ChecklistCreate,
     session: Db_session,
+    request: Request,
     current_user: Current_user,
 ) -> ChecklistRead:
     """Creates an onboarding checklist with free-form fields and system access items.
@@ -46,7 +45,7 @@ def create_checklist(
     Returns:
         ChecklistRead: Fully serialized created checklist.
     """
-    return create_onboarding_checklist(session, data, current_user.id)
+    return create_onboarding_checklist(session, data, request, current_user.id, current_user.username)
 
 
 @router.get(
