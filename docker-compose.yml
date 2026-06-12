@@ -29,6 +29,11 @@ services:
       - TURNSTILE_B_URL=${TURNSTILE_B_URL}
       - TURNSTILE_A_SESSION=${TURNSTILE_A_SESSION}
       - TURNSTILE_B_SESSION=${TURNSTILE_B_SESSION}
+      - IFS_BASE_URL=${IFS_BASE_URL}
+      - IFS_USERNAME=${IFS_USERNAME}
+      - IFS_PASSWORD=${IFS_PASSWORD}
+      - IFS_CLIENT_ID=${IFS_CLIENT_ID}
+      - IFS_CLIENT_SECRET=${IFS_CLIENT_SECRET}
     volumes:
       - offboarding_data:/app/data
     restart: always
