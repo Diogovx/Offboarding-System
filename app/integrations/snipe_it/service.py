@@ -2,6 +2,7 @@ import httpx
 from app.core.config import settings
 from app.integrations.snipe_it.schemas import GenerateTermRequest
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class SnipeItService:
     ) -> int:
         response = await client.get(
             "users",
-            params={"search": registration}
+            params={"search": registration, "limit": 10}
         )
         response.raise_for_status()
 
@@ -32,7 +33,16 @@ class SnipeItService:
                 f"Usuário com matrícula '{registration}' não encontrado no Snipe-IT."
             )
 
-        return data["rows"][0]["id"]
+        rows = data.get("rows", [])
+        for row in rows:
+            if str(row.get("employee_num", "")) == str(registration):
+                return row
+
+        logger.warning(
+            f"Nenhum usuário com employee_num exato '{registration}'. "
+            f"Usando primeiro resultado."
+        )
+        return rows[0]
 
     async def _get_asset_by_tag(
         self,
@@ -45,19 +55,20 @@ class SnipeItService:
 
     async def search_assets_by_user(self, registration: str):
         async with httpx.AsyncClient(
-            base_url=self.base_url,
-            headers=self.headers
+            base_url=self.base_url, headers=self.headers
         ) as client:
-            user_id = await self._get_user_by_registration(
-                client, registration
-            )
+            user = await self._get_user_by_registration(client, registration)
+            user_id = user["id"]
 
-            response = await client.get(f"users/{user_id}/assets")
+            response = await client.get(
+                f"users/{user_id}/assets",
+                params={"limit": 500}
+            )
             response.raise_for_status()
 
             assets = response.json().get("rows", [])
             logger.info(
-                f"Encontrados {len(assets)} ativos para a matrícula {registration}."
+                f"{len(assets)} ativo(s) encontrado(s) para matrícula {registration}."
             )
             return assets
 
@@ -109,6 +120,47 @@ class SnipeItService:
             )
             response.raise_for_status()
             return response.json()
+
+    async def update_user_notes(
+        self,
+        registration: str,
+        performed_by: str,
+    ) -> None:
+        """Updates the Snipe-IT user notes field to record the offboarding event.
+
+        Sets a note on the user record indicating who performed the offboarding
+        and when it occurred, using the Snipe-IT user update endpoint.
+
+        Args:
+            registration (str): Employee registration number.
+            performed_by (str): Username of the person who performed the offboarding.
+        """
+        async with httpx.AsyncClient(
+            base_url=self.base_url, headers=self.headers
+        ) as client:
+            user = await self._get_user_by_registration(client, registration)
+            user_id = user["id"]
+
+            timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+            note = (
+                f"Desativado via Offboarding System em {timestamp} "
+                f"por {performed_by}."
+            )
+
+            response = await client.patch(
+                f"users/{user_id}",
+                json={"notes": note}
+            )
+
+            if not response.is_success:
+                logger.warning(
+                    f"Falha ao atualizar notas do usuário {registration} "
+                    f"no Snipe-IT: {response.status_code} — {response.text}"
+                )
+            else:
+                logger.info(
+                    f"Notas do usuário {registration} atualizadas no Snipe-IT."
+                )
 
     async def get_templates(self) -> list:
         """

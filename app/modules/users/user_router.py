@@ -37,25 +37,10 @@ def list_users(
         select(User).offset(filter_users.offset).limit(filter_users.limit)
     ).all()
 
-    create_audit_log(
-        session,
-        AuditLogCreate(
-            action=AuditAction.LIST_USERS,
-            status=AuditStatus.SUCCESS,
-            message=f"""Listed users offset={filter_users.offset}
-            limit={filter_users.limit}""",
-            user_id=current_user.id,
-            username=current_user.username,
-            resource="/users",
-            ip_address=request.client.host if request.client else None,
-            user_agent=request.headers.get("user-agent"),
-        ),
-    )
-
     return {"users": users}
 
 
-@router.post("/test", response_model=UserPublic)
+""" @router.post("/test", response_model=UserPublic)
 def create_test_user(session: Db_session, request: Request):
     existing_user = (
         session.query(User).filter(User.username == "test-user").first()
@@ -91,7 +76,7 @@ def create_test_user(session: Db_session, request: Request):
             user_agent=request.headers.get("user-agent"),
         ),
     )
-    return user
+    return user """
 
 
 @router.post("/", status_code=HTTPStatus.CREATED, response_model=UserPublic)
@@ -135,7 +120,7 @@ def create_user(
             AuditLogCreate(
                 action=AuditAction.CREATE_USER,
                 status=AuditStatus.SUCCESS,
-                message=f"User '{user.username}' created",
+                message=f"User '{user.username}' created by {current_user.username}",
                 user_id=current_user.id,
                 username=current_user.username,
                 resource=user.username,
