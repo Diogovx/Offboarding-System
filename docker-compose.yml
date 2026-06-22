@@ -34,6 +34,11 @@ services:
       - IFS_PASSWORD=${IFS_PASSWORD}
       - IFS_CLIENT_ID=${IFS_CLIENT_ID}
       - IFS_CLIENT_SECRET=${IFS_CLIENT_SECRET}
+      - IFS_BASE_URL_TST=${IFS_BASE_URL_TST}
+      - IFS_USERNAME_TST=${IFS_USERNAME_TST}
+      - IFS_PASSWORD_TST=${IFS_PASSWORD_TST}
+      - IFS_CLIENT_ID_TST=${IFS_CLIENT_ID_TST}
+      - IFS_CLIENT_SECRET_TST=${IFS_CLIENT_SECRET_TST}
     volumes:
       - offboarding_data:/app/data
     restart: always

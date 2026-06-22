@@ -28,10 +28,10 @@ class IFSService:
             return self._token
         
         payload = IFSTokenRequest(
-            username=settings.IFS_USERNAME,
-            password=settings.IFS_PASSWORD,
-            client_id=settings.IFS_CLIENT_ID,
-            client_secret=settings.IFS_CLIENT_SECRET
+            username=settings.IFS_USERNAME_TST,
+            password=settings.IFS_PASSWORD_TST,
+            client_id=settings.IFS_CLIENT_ID_TST,
+            client_secret=settings.IFS_CLIENT_SECRET_TST
         )
 
         logger.info("Searching for id_token...")
