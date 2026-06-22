@@ -4,7 +4,7 @@ from enum import Enum
 class EmailActions(str, Enum):
     CONSULT = "consult"
     ACTIVATE = "activate"
-    DISABLE = "disable"
+    DISABLE = "offboarding"
 
     @classmethod
     def get_by_id(cls, action_id: int):

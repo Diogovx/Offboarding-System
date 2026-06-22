@@ -43,6 +43,7 @@ class ItemRead(ItemCreate):
     status:          ItemStatus
     completed_at:    datetime | None
     completed_by_id: UUID | None
+    completed_by_username: str | None = None
 
     model_config = {"from_attributes": True}
 
