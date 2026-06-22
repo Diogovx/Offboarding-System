@@ -1,5 +1,3 @@
-# app/modules/offboarding/use_cases/deactivate_intouch.py
-
 import logging
 from fastapi import Request
 

@@ -39,7 +39,7 @@ async def disable_gateway_access(
                 AuditLogCreate(
                     action=AuditAction.DISABLE_TURNSTILE_USER,
                     status=AuditStatus.SUCCESS,
-                    message=f"User {registration} blocked in all turnstiles.",
+                    message=f"Gateway: User {registration} blocked in all turnstiles.",
                     user_id=current_user.id,
                     username=current_user.username,
                     target_username=target_username,
@@ -58,7 +58,7 @@ async def disable_gateway_access(
             AuditLogCreate(
                 action=AuditAction.DISABLE_TURNSTILE_USER,
                 status=AuditStatus.FAILED,
-                message=f"Turnstile deactivation failed: {e}",
+                message=f"Gateway deactivation failed: {e}",
                 user_id=current_user.id,
                 username=current_user.username,
                 target_username=target_username,

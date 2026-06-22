@@ -52,7 +52,7 @@ async def disable_ad_account(
                     AuditLogCreate(
                         action=AuditAction.DISABLE_AD_USER,
                         status=AuditStatus.SUCCESS,
-                        message=f"User {registration} deactivated from AD.",
+                        message=f"Network: User {registration} deactivated from AD.",
                         user_id=current_user.id,
                         username=current_user.username,
                         target_username=target_username,

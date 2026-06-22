@@ -147,7 +147,6 @@ async def execute_offboarding(
         req=req,
     )
 
-    # Equipment — generate terms and checkin assets
     if services_map.get(OffboardingSystem.EQUIPMENT):
         success, terms = await checkin_assets(
             registration=registration,
@@ -157,6 +156,17 @@ async def execute_offboarding(
         if success:
             successfully_revoked.append(OffboardingSystem.EQUIPMENT)
             generated_terms.extend(terms)
+
+            try:
+                await snipeit_service.update_user_notes(
+                    registration=registration,
+                    performed_by=current_user.username,
+                )
+            except Exception as e:
+                logger.warning(
+                    f"Não foi possível atualizar notas no Snipe-IT "
+                    f"para {registration}: {e}"
+                )
 
     # Gate access
     if services_map.get(OffboardingSystem.ACCESS):
