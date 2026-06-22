@@ -152,6 +152,9 @@ async def execute_offboarding(
             registration=registration,
             target_name=target_user.name,
             snipeit_service=snipeit_service,
+            current_user=current_user,
+            session=session,
+            req=req
         )
         if success:
             successfully_revoked.append(OffboardingSystem.EQUIPMENT)
