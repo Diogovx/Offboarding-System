@@ -12,11 +12,11 @@ if __name__ == "__main__":
     async def test_full_workflow():
         print("Starting full IFS integration workflow test...")
         
-        if not settings.IFS_BASE_URL:
+        if not settings.IFS_BASE_URL_TST:
             print("ERROR: IFS_BASE_URL environment variable is missing. Test aborted.")
             return
 
-        ifs_service = IFSService(base_url=settings.IFS_BASE_URL)
+        ifs_service = IFSService(base_url=settings.IFS_BASE_URL_TST)
         
         async with httpx.AsyncClient() as client:
             try:
