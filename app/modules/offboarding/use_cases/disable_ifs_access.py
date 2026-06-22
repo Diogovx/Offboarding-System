@@ -46,7 +46,7 @@ async def disable_ifs_access(
                     AuditLogCreate(
                         action=AuditAction.DISABLE_IFS_USER,
                         status=AuditStatus.SUCCESS,
-                        message=f"IFS: User {registration} deactivated from AD.",
+                        message=f"IFS: User {registration} deactivated from IFS.",
                         user_id=current_user.id,
                         username=current_user.username,
                         target_username=target_username,
