@@ -15,7 +15,7 @@ async def check_ifs_status(registration: str) -> bool:
     """
     try:
 
-        ifs_service = IFSService(base_url=settings.IFS_BASE_URL_TST)
+        ifs_service = IFSService(base_url=settings.IFS_BASE_URL)
 
         return await ifs_service.search_user(registration)
 
@@ -40,7 +40,7 @@ async def disable_ifs_access(
     try:
         async with httpx.AsyncClient() as client:
 
-            ifs_service = IFSService(base_url=settings.IFS_BASE_URL_TST)
+            ifs_service = IFSService(base_url=settings.IFS_BASE_URL)
             create_audit_log(
                     session,
                     AuditLogCreate(
