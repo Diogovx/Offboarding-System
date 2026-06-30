@@ -5,9 +5,8 @@ from email.message import EmailMessage
 from zoneinfo import ZoneInfo
 
 from .email_actions import EmailActions
+from .email_enums import EMAIL_TEMPLATES
 from app.core import settings
-
-
 
 
 async def send_email(
@@ -15,34 +14,40 @@ async def send_email(
     action: EmailActions,
     user_target: str,
     performed_by: str = "System",
-    systems_list: list | None = None
-   
-    
+    systems_list: list | None = None,
+    lang: str = 'en'
     ):
-    now = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime(
+
+    lang_code = lang.split("-", maxsplit=1)[0].lower()
+    if lang_code not in EMAIL_TEMPLATES:
+        lang_code = "en"
+
+    template = EMAIL_TEMPLATES[lang_code]
+
+    now = datetime.now(ZoneInfo(template["zoneinfo"])).strftime(
         "%d/%m/%Y %H:%M:%S"
     )
 
     if systems_list and len(systems_list) > 0:
         items = "\n".join([f"- {s}" for s in systems_list])
-        txt_details = f"\nSistemas afetados com sucesso:\n{items}"
+        txt_details = f"{template['success_title']}\n{items}"
     else:
-
-        txt_details = (
-            "\nAtenção: Nenhum sistema afetado com sucesso "
-            )
+        txt_details = template['no_systems']
 
     msg = EmailMessage()
-    msg["Subject"] = f"Offboarding Log - {registration}"
+    msg["Subject"] = template["subject"].format(registration=registration)
     msg["From"] = settings.EMAIL_SENDER
     msg["To"] = settings.EMAIL_RECEIVER
 
     msg.set_content(
-        f"O usuário {user_target} com o registro {registration} "
-        f"passou pelo processo de: ({action.value}).\n"
-        f"Executor: {performed_by}\n"
-        f"{txt_details}\n"
-        f"Data/Hora: {now}"
+        template["body"].format(
+            user_target=user_target,
+            registration=registration,
+            action_value=action.value,
+            performed_by=performed_by,
+            txt_details=txt_details,
+            now=now
+        )
     )
 
     context = ssl.create_default_context()
