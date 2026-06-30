@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Header
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
@@ -110,6 +110,7 @@ async def execute_offboarding(
     background_tasks,
     req: Request,
     session: Session,
+    lang: str | None = "en"
 ) -> OffboardingResult:
     """Orchestrates the full offboarding process for a given employee.
 
@@ -213,6 +214,7 @@ async def execute_offboarding(
             user_target=target_user.name,
             performed_by=str(current_user.username),
             systems_list=successfully_revoked,
+            lang=lang
         )
 
     return OffboardingResult(

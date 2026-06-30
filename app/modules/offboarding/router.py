@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, Response, Header
 
 from app.core.database import Db_session
 from app.modules.users import Current_user
@@ -53,6 +53,7 @@ async def execute(
     request: Request,
     session: Db_session,
     snipeit_service: SnipeItService = Depends(get_snipeit_service),
+    accept_language: str | None = Header(default="pt")
 ) -> OffboardingResult:
     """Triggers the full offboarding sequence for the given registration.
 
@@ -79,6 +80,7 @@ async def execute(
         snipeit_service=snipeit_service,
         req=request,
         session=session,
+        lang=accept_language
     )
 
 
