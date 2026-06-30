@@ -1,7 +1,6 @@
 import logging
 import asyncio 
 import httpx
-from app.core.config import settings
 
 from app.integrations.ifs.schemas import (
     IFSTokenResponse, 
@@ -16,10 +15,13 @@ logger = logging.getLogger(__name__)
 
 class IFSService:
 
-    def __init__(self, base_url: str): 
+    def __init__(self, base_url: str, username: str, password: str, client_id: str, client_secret: str): 
         self.base_url = base_url.rstrip("/")
+        self.username = username
+        self.password = password
+        self.client_id = client_id
+        self.client_secret = client_secret
         self._token = None
-        self.headers = {}   
 
     async def _get_token_ifs(self, client: httpx.AsyncClient) -> str:
         url = f"{self.base_url}/openid-connect-provider/idp/token"
@@ -28,10 +30,10 @@ class IFSService:
             return self._token
         
         payload = IFSTokenRequest(
-            username=settings.IFS_USERNAME,
-            password=settings.IFS_PASSWORD,
-            client_id=settings.IFS_CLIENT_ID,
-            client_secret=settings.IFS_CLIENT_SECRET
+            username=self.username,
+            password=self.password,
+            client_id=self.client_id,
+            client_secret=self.client_secret
         )
 
         logger.info("Searching for id_token...")
