@@ -76,7 +76,7 @@ async def verify_services(
     if not isinstance(ad_response, BaseException) and ad_response:
         service_map[OffboardingSystem.NETWORK] = bool(ad_response[0].enabled)
     elif isinstance(ad_response, BaseException):
-        logger.error(f"Falha ao buscar AD: {ad_response}")
+        logger.error(f"Failed to retrieve AD: {ad_response}")
 
     if (
         not isinstance(intouch_data, BaseException)
@@ -85,17 +85,17 @@ async def verify_services(
     ):
         service_map[OffboardingSystem.INTOUCH] = bool(intouch_data.is_active)
     elif isinstance(intouch_data, BaseException):
-        logger.error(f"Falha ao buscar InTouch: {intouch_data}")
+        logger.error(f"Failed to retrieve InTouch: {intouch_data}")
 
     if not isinstance(ifs_is_active, BaseException) and ifs_is_active:
         service_map[OffboardingSystem.IFS] = True
     elif isinstance(ifs_is_active, BaseException):
-        logger.error(f"Falha de conexão com o IFS: {ifs_is_active}")
+        logger.error(f"Connection failure with the IFS: {ifs_is_active}")
 
     if not isinstance(snipeit_assets, BaseException) and snipeit_assets:
         service_map[OffboardingSystem.EQUIPMENT] = True
     elif isinstance(snipeit_assets, BaseException):
-        logger.error(f"Falha de conexão com o Snipe-IT: {snipeit_assets}")
+        logger.error(f"Connection failure with Snipe-IT: {snipeit_assets}")
 
     logger.info(f"Active services for {registration}: {service_map}")
     return service_map
