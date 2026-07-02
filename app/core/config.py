@@ -38,14 +38,14 @@ class Settings(BaseSettings):
     SNIPEIT_BASE_URL: str = "your_url_here"
     IFS_BASE_URL: str = ""
     IFS_USERNAME: str = "username_here"
-    IFS_BASE_URL_TST: str = "your_url_here"
-    IFS_USERNAME_TST: str = "username here"
     IFS_PASSWORD: str = "password_here"
-    IFS_PASSWORD_TST: str = "password_here"
     IFS_CLIENT_ID: str = ""
-    IFS_CLIENT_ID_TST: str = ""
     IFS_CLIENT_SECRET: str = ""
-    IFS_CLIENT_SECRET_TST: str = ""
+    IFS_TST_BASE_URL: str = ""
+    IFS_TST_USERNAME: str = ""
+    IFS_TST_PASSWORD: str = ""
+    IFS_TST_CLIENT_ID: str = ""
+    IFS_TST_CLIENT_SECRET: str = ""
     
 
 
